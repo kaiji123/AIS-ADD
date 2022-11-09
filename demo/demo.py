@@ -104,7 +104,8 @@ if __name__ == "__main__":
     logger.info("Arguments: " + str(args))
 
     cfg = setup_cfg(args)
-
+    cfg.defrost()
+    cfg.MODEL.DEVICE = 'cpu'
     demo = VisualizationDemo(cfg)
 
     if args.input:

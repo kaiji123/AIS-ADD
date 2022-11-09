@@ -10,7 +10,7 @@ import logging
 import os
 from collections import OrderedDict
 from typing import Any, Dict, List, Set
-
+from detectron2.data import DatasetCatalog, MetadataCatalog
 import torch
 
 import detectron2.utils.comm as comm
@@ -266,8 +266,10 @@ def main(args):
 
 print("hello")
 if __name__ == "__main__":
-    args = default_argument_parser().parse_args()
-    print("Command Line Args:", args)
+    DatasetCatalog.get('cs_train')
+    # args = default_argument_parser().parse_args()
+    # print("Command Line Args:", args)
+    
     # launch(
     #     main,
     #     args.num_gpus,
