@@ -12,7 +12,7 @@ from collections import OrderedDict
 from typing import Any, Dict, List, Set
 from detectron2.data import DatasetCatalog, MetadataCatalog
 import torch
-
+from sys import platform
 from detectron2.data.datasets import load_sem_seg
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
@@ -250,7 +250,9 @@ def setup(args):
 def main(args):
     cfg = setup(args)
     cfg.defrost()
-    cfg.MODEL.DEVICE = 'cpu'
+    print("my platform is ", platform)
+    if platform == "win32":
+        cfg.MODEL.DEVICE = 'cpu'
     cfg.freeze()
 
     if args.eval_only:
@@ -267,7 +269,10 @@ def main(args):
 
     trainer = Trainer(cfg)
     trainer.resume_or_load(resume=args.resume)
-    return trainer.train()
+    trainer.train()
+    torch.save(trainer.model, 'mycheck.pth')
+    print('model saved')
+    return
 
 
 

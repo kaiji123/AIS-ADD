@@ -260,9 +260,10 @@ def main(args):
 
     trainer = Trainer(cfg)
     trainer.resume_or_load(resume=args.resume)
-    return trainer.train()
-
-
+    trainer.train()
+    torch.save(trainer.model, 'mycheck.pth')
+    print("model saved")
+    return
 
 print("hello")
 if __name__ == "__main__":

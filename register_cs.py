@@ -3,7 +3,7 @@ import os
 
 from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.data.datasets import load_sem_seg
-
+from sys import platform
 COCO_CATEGORIES = [
     {"color": [255, 255, 255], "isthing": 1, "id": 1, "name": "person"},
 ]
@@ -31,10 +31,16 @@ def register_cs(root):
     print(root)
     root = os.path.join(root, "cs")
     meta = _get_coco_stuff_meta()
-    for name, image_dirname, sem_seg_dirname in [
+    directory= [
+        ("train", "train/images", "train/annotations"),
+        ("test", "test/images", "test/annotations"),
+    ]
+    if platform == 'win32':
+        directory = [
         ("train", "train\\images", "train\\annotations"),
         ("test", "test\\images", "test\\annotations"),
-    ]:
+    ]
+    for name, image_dirname, sem_seg_dirname in directory:
         image_dir = os.path.join(root, image_dirname)
         gt_dir = os.path.join(root, sem_seg_dirname)
         name = f"cs_{name}"

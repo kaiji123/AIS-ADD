@@ -12,7 +12,7 @@ from detectron2.modeling import META_ARCH_REGISTRY, build_backbone, build_sem_se
 from detectron2.modeling.backbone import Backbone
 from detectron2.modeling.postprocessing import sem_seg_postprocess
 from detectron2.structures import ImageList
-
+import cv2
 from .modeling.criterion import SetCriterion
 from .modeling.matcher import HungarianMatcher
 
@@ -186,7 +186,7 @@ class MaskFormer(nn.Module):
             # mask classification target
             if "instances" in batched_inputs[0]:
                 gt_instances = [x["instances"].to(self.device) for x in batched_inputs]
-                print('gt instances',gt_instances)
+                # print('gt instances',gt_instances)
           
                 targets = self.prepare_targets(gt_instances, images)
                 # print("instances exist")
@@ -194,10 +194,11 @@ class MaskFormer(nn.Module):
                 # print('labels',targets[0]['labels'])
                 # print('masks', targets[0]["masks"])
                 tar = targets[0]['masks'].view(targets[0]['masks'].shape[1], targets[0]['masks'].shape[2], targets[0]['masks'].shape[0])
-                plt.imshow(tar)
-                plt.show()
-                time.sleep(5000)
-                plt.close()
+                # plt.imshow(tar)
+                # plt.show()
+                # time.sleep(5000)
+                # plt.close()
+                
             else:
                 targets = None
 
@@ -210,6 +211,7 @@ class MaskFormer(nn.Module):
                 else:
                     # remove this loss if not specified in `weight_dict`
                     losses.pop(k)
+            print(losses)
 
             return losses
         else:
