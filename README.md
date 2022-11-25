@@ -1,36 +1,6 @@
-# MaskFormer: Per-Pixel Classification is Not All You Need for Semantic Segmentation
+# Using Maskformer in FPS-games
 
-[Bowen Cheng](https://bowenc0221.github.io/), [Alexander G. Schwing](https://alexander-schwing.de/), [Alexander Kirillov](https://alexander-kirillov.github.io/)
-
-[[`arXiv`](http://arxiv.org/abs/2107.06278)] [[`Project`](https://bowenc0221.github.io/maskformer)] [[`BibTeX`](#CitingMaskFormer)]
-
-<div align="center">
-  <img src="https://bowenc0221.github.io/images/maskformer.png" width="100%" height="100%"/>
-</div><br/>
-
-### Mask2Former
-Checkout [Mask2Former](https://github.com/facebookresearch/Mask2Former), a universal architecture based on MaskFormer meta-architecture that
-achieves SOTA on panoptic, instance and semantic segmentation across four popular datasets (ADE20K, Cityscapes, COCO, Mapillary Vistas).
-
-### Features
-* Better results while being more efficient.
-* Unified view of semantic- and instance-level segmentation tasks.
-* Support major semantic segmentation datasets: ADE20K, Cityscapes, COCO-Stuff, Mapillary Vistas.
-* Support **ALL** Detectron2 models.
-
-## Installation
-
-See [installation instructions](INSTALL.md).
-
-## Getting Started
-
-See [Preparing Datasets for MaskFormer](datasets/README.md).
-
-See [Getting Started with MaskFormer](GETTING_STARTED.md).
-
-## Model Zoo and Baselines
-
-We provide a large set of baseline results and trained models available for download in the [MaskFormer Model Zoo](MODEL_ZOO.md).
+# Bibliography.
 
 ## License
 
@@ -60,3 +30,15 @@ If you use MaskFormer in your research or wish to refer to the baseline results 
   year={2021}
 }
 ```
+
+
+
+## MaskFormer: Per-Pixel Classification is Not All You Need for Semantic Segmentation
+
+[Bowen Cheng](https://bowenc0221.github.io/), [Alexander G. Schwing](https://alexander-schwing.de/), [Alexander Kirillov](https://alexander-kirillov.github.io/)
+
+[[`arXiv`](http://arxiv.org/abs/2107.06278)] [[`Project`](https://bowenc0221.github.io/maskformer)] [[`BibTeX`](#CitingMaskFormer)]
+
+<div align="center">
+  <img src="https://bowenc0221.github.io/images/maskformer.png" width="100%" height="100%"/>
+</div><br/>

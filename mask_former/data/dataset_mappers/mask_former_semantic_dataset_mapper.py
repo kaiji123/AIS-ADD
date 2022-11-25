@@ -5,14 +5,15 @@ import logging
 import numpy as np
 import torch
 from torch.nn import functional as F
-
+import cv2 
+import matplotlib.pyplot as plt
 from detectron2.config import configurable
 from detectron2.data import MetadataCatalog
 from detectron2.data import detection_utils as utils
 from detectron2.data import transforms as T
 from detectron2.projects.point_rend import ColorAugSSDTransform
 from detectron2.structures import BitMasks, Instances
-
+import time
 __all__ = ["MaskFormerSemanticDatasetMapper"]
 
 
@@ -108,10 +109,14 @@ class MaskFormerSemanticDatasetMapper:
         dataset_dict = copy.deepcopy(dataset_dict)  # it will be modified by code below
         image = utils.read_image(dataset_dict["file_name"], format=self.img_format)
         utils.check_image_size(dataset_dict, image)
+        print(dataset_dict['file_name'])
+        print(dataset_dict['sem_seg_file_name'])
 
         if "sem_seg_file_name" in dataset_dict:
+            
             # PyTorch transformation not implemented for uint16, so converting it to double first
             sem_seg_gt = utils.read_image(dataset_dict.pop("sem_seg_file_name")).astype("double")
+            print('sem_seg_gt', sem_seg_gt)
         else:
             sem_seg_gt = None
 
@@ -125,10 +130,31 @@ class MaskFormerSemanticDatasetMapper:
         aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
         aug_input, transforms = T.apply_transform_gens(self.tfm_gens, aug_input)
         image = aug_input.image
-        sem_seg_gt = aug_input.sem_seg
+        print(image.shape)
+        print("image:", image)
+        # plt.imshow(image)
+        # plt.show()
 
+
+        img = image.copy()
+
+        #mask it - method 1:
+        # read mask as grayscale in range 0 to 255
+        print(sem_seg_gt.shape)
+        sem_seg_gt = aug_input.sem_seg
+        sem_seg_gt[sem_seg_gt >0]=1
+        print('sem seg ', sem_seg_gt)
+        mask1 = sem_seg_gt.copy()
+        result1 = img.copy()
+        result1[mask1 == 0] = 0
+        result1[mask1 != 0] = img[mask1 != 0]
+        # cv2.imshow('masked image', result1)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
         # Pad image and segmentation label here!
         image = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
+
+        
         if sem_seg_gt is not None:
             sem_seg_gt = torch.as_tensor(sem_seg_gt.astype("long"))
 
@@ -152,16 +178,20 @@ class MaskFormerSemanticDatasetMapper:
         dataset_dict["image"] = image
 
         if sem_seg_gt is not None:
+            print("assigning sem_seg")
             dataset_dict["sem_seg"] = sem_seg_gt.long()
 
         if "annotations" in dataset_dict:
             raise ValueError("Semantic segmentation dataset should not have 'annotations'.")
-
+    
         # Prepare per-category binary masks
         if sem_seg_gt is not None:
             sem_seg_gt = sem_seg_gt.numpy()
+            print("")
             instances = Instances(image_shape)
             classes = np.unique(sem_seg_gt)
+            print("length of classes",len(classes))
+            print("classes",classes)
             # remove ignored region
             classes = classes[classes != self.ignore_label]
             instances.gt_classes = torch.tensor(classes, dtype=torch.int64)

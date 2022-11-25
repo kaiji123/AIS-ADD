@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Set
 from detectron2.data import DatasetCatalog, MetadataCatalog
 import torch
 
+from detectron2.data.datasets import load_sem_seg
 import detectron2.utils.comm as comm
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.config import get_cfg
@@ -30,7 +31,7 @@ from detectron2.evaluation import (
 from detectron2.projects.deeplab import add_deeplab_config, build_lr_scheduler
 from detectron2.solver.build import maybe_add_gradient_clipping
 from detectron2.utils.logger import setup_logger
-
+from mask_former import MaskFormer
 # MaskFormer
 from mask_former import (
     DETRPanopticDatasetMapper,
@@ -39,6 +40,8 @@ from mask_former import (
     SemanticSegmentorWithTTA,
     add_mask_former_config,
 )
+
+
 
 
 class Trainer(DefaultTrainer):
@@ -55,66 +58,69 @@ class Trainer(DefaultTrainer):
         evaluator manually in your script and do not have to worry about the
         hacky if-else logic here.
         """
+        s = DatasetCatalog.get(dataset_name)
         if output_folder is None:
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference")
         print(output_folder)
         evaluator_list = []
-        evaluator_type = MetadataCatalog.get(dataset_name).evaluator_type
-        print(evaluator_type)
-        if evaluator_type in ["sem_seg", "ade20k_panoptic_seg"]:
-            evaluator_list.append(
-                SemSegEvaluator(
-                    dataset_name,
-                    distributed=True,
-                    output_dir=output_folder,
-                )
+        # evaluator_type = MetadataCatalog.get(dataset_name).evaluator_type
+        # print(evaluator_type)
+        # if evaluator_type in ["sem_seg", "ade20k_panoptic_seg"]:
+        evaluator_list.append(
+            SemSegEvaluator(
+                dataset_name,
+                distributed=True,
+                output_dir=output_folder,
             )
-        if evaluator_type == "coco":
-            evaluator_list.append(COCOEvaluator(dataset_name, output_dir=output_folder))
-        if evaluator_type in [
-            "coco_panoptic_seg",
-            "ade20k_panoptic_seg",
-            "cityscapes_panoptic_seg",
-        ]:
-            evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder))
-        if evaluator_type == "cityscapes_instance":
-            assert (
-                torch.cuda.device_count() >= comm.get_rank()
-            ), "CityscapesEvaluator currently do not work with multiple machines."
-            return CityscapesInstanceEvaluator(dataset_name)
-        if evaluator_type == "cityscapes_sem_seg":
-            assert (
-                torch.cuda.device_count() >= comm.get_rank()
-            ), "CityscapesEvaluator currently do not work with multiple machines."
-            return CityscapesSemSegEvaluator(dataset_name)
-        if evaluator_type == "cityscapes_panoptic_seg":
-            assert (
-                torch.cuda.device_count() >= comm.get_rank()
-            ), "CityscapesEvaluator currently do not work with multiple machines."
-            evaluator_list.append(CityscapesSemSegEvaluator(dataset_name))
-        if len(evaluator_list) == 0:
-            raise NotImplementedError(
-                "no Evaluator for the dataset {} with the type {}".format(
-                    dataset_name, evaluator_type
-                )
-            )
-        elif len(evaluator_list) == 1:
-            return evaluator_list[0]
+        )
+        # if evaluator_type == "coco":
+        #     evaluator_list.append(COCOEvaluator(dataset_name, output_dir=output_folder))
+        # if evaluator_type in [
+        #     "coco_panoptic_seg",
+        #     "ade20k_panoptic_seg",
+        #     "cityscapes_panoptic_seg",
+        # ]:
+        #     evaluator_list.append(COCOPanopticEvaluator(dataset_name, output_folder))
+        # if evaluator_type == "cityscapes_instance":
+        #     assert (
+        #         torch.cuda.device_count() >= comm.get_rank()
+        #     ), "CityscapesEvaluator currently do not work with multiple machines."
+        #     return CityscapesInstanceEvaluator(dataset_name)
+        # if evaluator_type == "cityscapes_sem_seg":
+        #     assert (
+        #         torch.cuda.device_count() >= comm.get_rank()
+        #     ), "CityscapesEvaluator currently do not work with multiple machines."
+        #     return CityscapesSemSegEvaluator(dataset_name)
+        # if evaluator_type == "cityscapes_panoptic_seg":
+        #     assert (
+        #         torch.cuda.device_count() >= comm.get_rank()
+        #     ), "CityscapesEvaluator currently do not work with multiple machines."
+        #     evaluator_list.append(CityscapesSemSegEvaluator(dataset_name))
+        # if len(evaluator_list) == 0:
+        #     raise NotImplementedError(
+        #         "no Evaluator for the dataset {} with the type {}".format(
+        #             dataset_name, evaluator_type
+        #         )
+        #     )
+        # elif len(evaluator_list) == 1:
+        #     return evaluator_list[0]
         return DatasetEvaluators(evaluator_list)
 
     @classmethod
     def build_train_loader(cls, cfg):
         # Semantic segmentation dataset mapper
-        if cfg.INPUT.DATASET_MAPPER_NAME == "mask_former_semantic":
-            mapper = MaskFormerSemanticDatasetMapper(cfg, True)
-        # Panoptic segmentation dataset mapper
-        elif cfg.INPUT.DATASET_MAPPER_NAME == "mask_former_panoptic":
-            mapper = MaskFormerPanopticDatasetMapper(cfg, True)
-        # DETR-style dataset mapper for COCO panoptic segmentation
-        elif cfg.INPUT.DATASET_MAPPER_NAME == "detr_panoptic":
-            mapper = DETRPanopticDatasetMapper(cfg, True)
-        else:
-            mapper = None
+        assert cfg.INPUT.DATASET_MAPPER_NAME == "mask_former_semantic"
+        print("semantic segmentation activated")
+        mapper = MaskFormerSemanticDatasetMapper(cfg, True)
+        
+        # # Panoptic segmentation dataset mapper
+        # elif cfg.INPUT.DATASET_MAPPER_NAME == "mask_former_panoptic":
+        #     mapper = MaskFormerPanopticDatasetMapper(cfg, True)
+        # # DETR-style dataset mapper for COCO panoptic segmentation
+        # elif cfg.INPUT.DATASET_MAPPER_NAME == "detr_panoptic":
+        #     mapper = DETRPanopticDatasetMapper(cfg, True)
+        # else:
+        #     mapper = None
         return build_detection_train_loader(cfg, mapper=mapper)
 
     @classmethod
@@ -127,6 +133,7 @@ class Trainer(DefaultTrainer):
 
     @classmethod
     def build_optimizer(cls, cfg, model):
+        print("the model is ", model)
         weight_decay_norm = cfg.SOLVER.WEIGHT_DECAY_NORM
         weight_decay_embed = cfg.SOLVER.WEIGHT_DECAY_EMBED
 
@@ -264,17 +271,18 @@ def main(args):
 
 
 
-print("hello")
+
 if __name__ == "__main__":
-    DatasetCatalog.get('cs_train')
-    # args = default_argument_parser().parse_args()
-    # print("Command Line Args:", args)
+    # DatasetCatalog.get('cs_train')
+    import register_cs
+    args = default_argument_parser().parse_args()
+    print("Command Line Args:", args)
     
-    # launch(
-    #     main,
-    #     args.num_gpus,
-    #     num_machines=args.num_machines,
-    #     machine_rank=args.machine_rank,
-    #     dist_url=args.dist_url,
-    #     args=(args,),
-    # )
+    launch(
+        main,
+        args.num_gpus,
+        num_machines=args.num_machines,
+        machine_rank=args.machine_rank,
+        dist_url=args.dist_url,
+        args=(args,),
+    )

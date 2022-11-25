@@ -38,7 +38,6 @@ def register_cs(root):
         image_dir = os.path.join(root, image_dirname)
         gt_dir = os.path.join(root, sem_seg_dirname)
         name = f"cs_{name}"
-        print("hello")
         print("dict: ",load_sem_seg(gt_dir, image_dir, gt_ext="png", image_ext="jpg"))
         DatasetCatalog.register(
             name, lambda x=image_dir, y=gt_dir: load_sem_seg(y, x, gt_ext="png", image_ext="jpg")

@@ -5,6 +5,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+import time
 from detectron2.config import configurable
 from detectron2.data import MetadataCatalog
 from detectron2.modeling import META_ARCH_REGISTRY, build_backbone, build_sem_seg_head
@@ -15,7 +16,7 @@ from detectron2.structures import ImageList
 from .modeling.criterion import SetCriterion
 from .modeling.matcher import HungarianMatcher
 
-
+import matplotlib.pyplot as plt
 @META_ARCH_REGISTRY.register()
 class MaskFormer(nn.Module):
     """
@@ -61,6 +62,7 @@ class MaskFormer(nn.Module):
                 the per-channel mean and std to be used to normalize the input image
         """
         super().__init__()
+        print("maskformer model initialized Kai Yi Ji")
         self.backbone = backbone
         self.sem_seg_head = sem_seg_head
         self.criterion = criterion
@@ -104,7 +106,7 @@ class MaskFormer(nn.Module):
             weight_dict.update(aux_weight_dict)
 
         losses = ["labels", "masks"]
-
+        print("number of classes ",sem_seg_head.num_classes )
         criterion = SetCriterion(
             sem_seg_head.num_classes,
             matcher=matcher,
@@ -162,8 +164,20 @@ class MaskFormer(nn.Module):
                         Each dict contains keys "id", "category_id", "isthing".
         """
         images = [x["image"].to(self.device) for x in batched_inputs]
+        # print("shape",images[0].shape)
+        # print("data",images[0])
+        print("number of classes", self.sem_seg_head.num_classes)
+        assert self.sem_seg_head.num_classes == 1
+       
         images = [(x - self.pixel_mean) / self.pixel_std for x in images]
         images = ImageList.from_tensors(images, self.size_divisibility)
+        img = images[0].view(images[1].shape[1], images[1].shape[2], images[1].shape[0])
+
+        # plt.imshow(img)
+        # plt.show()
+        # time.sleep(5000)
+        # plt.close()
+
 
         features = self.backbone(images.tensor)
         outputs = self.sem_seg_head(features)
@@ -172,7 +186,18 @@ class MaskFormer(nn.Module):
             # mask classification target
             if "instances" in batched_inputs[0]:
                 gt_instances = [x["instances"].to(self.device) for x in batched_inputs]
+                print('gt instances',gt_instances)
+          
                 targets = self.prepare_targets(gt_instances, images)
+                # print("instances exist")
+                # print('targets', targets)
+                # print('labels',targets[0]['labels'])
+                # print('masks', targets[0]["masks"])
+                tar = targets[0]['masks'].view(targets[0]['masks'].shape[1], targets[0]['masks'].shape[2], targets[0]['masks'].shape[0])
+                plt.imshow(tar)
+                plt.show()
+                time.sleep(5000)
+                plt.close()
             else:
                 targets = None
 
