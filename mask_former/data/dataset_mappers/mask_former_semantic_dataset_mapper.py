@@ -140,7 +140,7 @@ class MaskFormerSemanticDatasetMapper:
 
         #mask it - method 1:
         # read mask as grayscale in range 0 to 255
-        print(sem_seg_gt.shape)
+        # print(sem_seg_gt.shape)
         sem_seg_gt = aug_input.sem_seg
         sem_seg_gt[sem_seg_gt >0]=1
         # print('sem seg ', sem_seg_gt)
@@ -178,7 +178,7 @@ class MaskFormerSemanticDatasetMapper:
         dataset_dict["image"] = image
 
         if sem_seg_gt is not None:
-            print("assigning sem_seg")
+            # print("assigning sem_seg")
             dataset_dict["sem_seg"] = sem_seg_gt.long()
 
         if "annotations" in dataset_dict:
@@ -187,11 +187,11 @@ class MaskFormerSemanticDatasetMapper:
         # Prepare per-category binary masks
         if sem_seg_gt is not None:
             sem_seg_gt = sem_seg_gt.numpy()
-            print("")
+            # print("")
             instances = Instances(image_shape)
             classes = np.unique(sem_seg_gt)
-            print("length of classes",len(classes))
-            print("classes",classes)
+            # print("length of classes",len(classes))
+            # print("classes",classes)
             # remove ignored region
             classes = classes[classes != self.ignore_label]
             instances.gt_classes = torch.tensor(classes, dtype=torch.int64)

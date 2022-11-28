@@ -106,7 +106,7 @@ class MaskFormer(nn.Module):
             weight_dict.update(aux_weight_dict)
 
         losses = ["labels", "masks"]
-        print("number of classes ",sem_seg_head.num_classes )
+        # print("number of classes ",sem_seg_head.num_classes )
         criterion = SetCriterion(
             sem_seg_head.num_classes,
             matcher=matcher,
@@ -193,7 +193,7 @@ class MaskFormer(nn.Module):
                 # print('targets', targets)
                 # print('labels',targets[0]['labels'])
                 # print('masks', targets[0]["masks"])
-                tar = targets[0]['masks'].view(targets[0]['masks'].shape[1], targets[0]['masks'].shape[2], targets[0]['masks'].shape[0])
+                # tar = targets[0]['masks'].view(targets[0]['masks'].shape[1], targets[0]['masks'].shape[2], targets[0]['masks'].shape[0])
                 # plt.imshow(tar)
                 # plt.show()
                 # time.sleep(5000)
