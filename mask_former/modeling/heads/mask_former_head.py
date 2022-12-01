@@ -81,7 +81,7 @@ class MaskFormerHead(nn.Module):
         self.pixel_decoder = pixel_decoder
         self.predictor = transformer_predictor
         self.transformer_in_feature = transformer_in_feature
-
+        print("head classes",num_classes)
         self.num_classes = num_classes
 
     @classmethod

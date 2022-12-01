@@ -41,45 +41,41 @@ from mask_former import (
     SemanticSegmentorWithTTA,
     add_mask_former_config,
 )
+import cv2
+import numpy as np
 
-
+# python ./train_cs.py --config-file configs\myconfig.yaml --eval-only MODEL.WEIGHTS output\model_final.pth
 class SegEval(SemSegEvaluator):
     def process(self, inputs, outputs):
 
-        for input, output in zip(inputs, outputs):
-                    
-                    print("self num classes", self._num_classes)
-                    if self._num_classes ==1:
-                        print("skipping",input)
+         for input, output in zip(inputs, outputs):
+            output = output["sem_seg"][1]
+            print(output.shape)
+     
+            
+            gt_filename = self.input_file_to_gt_file[input["file_name"]]
+            gt = self.sem_seg_loading_fn(gt_filename, dtype=np.int)
+            pred = output
+            print("pred",pred.shape)
+            print("gt",gt.shape)
+            gt[gt == self._ignore_label] = self._num_classes
+            print(pred.reshape(-1).shape) 
+            print(gt.reshape(-1).shape)
+            # self._conf_matrix += np.bincount(
+            #     (self._num_classes + 1)* pred.reshape(-1) + gt.reshape(-1),
+            #     minlength=self._conf_matrix.size,
+            # ).reshape(self._conf_matrix.shape)
 
-                    output = output["sem_seg"].argmax(dim=0).to(self._cpu_device)
-                    print("output",output)
-                    pred = np.array(output, dtype=np.int)
-                    print("prediction", output)
-                    gt_filename = self.input_file_to_gt_file[input["file_name"]]
-                    gt = self.sem_seg_loading_fn(gt_filename, dtype=np.int)
+            if self._compute_boundary_iou:
+                b_gt = self._mask_to_boundary(gt.astype(np.uint8))
+                b_pred = self._mask_to_boundary(pred.numpy().astype(np.uint8))
 
-                    gt[gt == self._ignore_label] = self._num_classes
-                    print()
+                # self._b_conf_matrix += np.bincount(
+                #     (self._num_classes + 1) * b_pred.reshape(-1) + b_gt.reshape(-1),
+                #     minlength=self._conf_matrix.size,
+                # ).reshape(self._conf_matrix.shape)
 
-                    self._conf_matrix += np.bincount(
-                        (self._num_classes + 1) * pred.reshape(-1) + gt.reshape(-1),
-                        minlength=self._conf_matrix.size,
-                    ).reshape(self._conf_matrix.shape)
-
-                    if self._compute_boundary_iou:
-                        b_gt = self._mask_to_boundary(gt.astype(np.uint8))
-                        b_pred = self._mask_to_boundary(pred.astype(np.uint8))
-
-                        self._b_conf_matrix += np.bincount(
-                            (self._num_classes + 1) * b_pred.reshape(-1) + b_gt.reshape(-1),
-                            minlength=self._conf_matrix.size,
-                        ).reshape(self._conf_matrix.shape)
-
-                    self._predictions.extend(self.encode_json_sem_seg(pred, input["file_name"]))
-        print("inputs:",inputs)
-        print("outputs",outputs)
-        return super().process(inputs, outputs)
+            # self._predictions.extend(self.encode_json_sem_seg(pred, input["file_name"]))
 
 
 class Trainer(DefaultTrainer):
@@ -289,6 +285,7 @@ def setup(args):
 
 
 def main(args):
+
     cfg = setup(args)
     cfg.defrost()
     print("my platform is ", platform)

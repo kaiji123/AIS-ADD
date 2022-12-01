@@ -122,6 +122,8 @@ class MaskFormerSemanticDatasetMapper:
                 )
             )
 
+        print("shape", sem_seg_gt.shape)
+
         # aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
         # aug_input, transforms = T.apply_transform_gens(self.tfm_gens, aug_input)
         # image = aug_input.image
@@ -133,6 +135,7 @@ class MaskFormerSemanticDatasetMapper:
         image = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
         if sem_seg_gt is not None:
             sem_seg_gt = torch.as_tensor(sem_seg_gt.astype("long"))
+        
 
         if self.size_divisibility > 0:
             image_size = (image.shape[-2], image.shape[-1])

@@ -116,7 +116,23 @@ class MaskFormer(nn.Module):
             eos_coef=no_object_weight,
             losses=losses,
         )
-
+        print ({
+            "backbone": backbone,
+            "sem_seg_head": sem_seg_head,
+            "criterion": criterion,
+            "num_queries": cfg.MODEL.MASK_FORMER.NUM_OBJECT_QUERIES,
+            "panoptic_on": cfg.MODEL.MASK_FORMER.TEST.PANOPTIC_ON,
+            "object_mask_threshold": cfg.MODEL.MASK_FORMER.TEST.OBJECT_MASK_THRESHOLD,
+            "overlap_threshold": cfg.MODEL.MASK_FORMER.TEST.OVERLAP_THRESHOLD,
+            "metadata": MetadataCatalog.get(cfg.DATASETS.TRAIN[0]),
+            "size_divisibility": cfg.MODEL.MASK_FORMER.SIZE_DIVISIBILITY,
+            "sem_seg_postprocess_before_inference": (
+                cfg.MODEL.MASK_FORMER.TEST.SEM_SEG_POSTPROCESSING_BEFORE_INFERENCE
+                or cfg.MODEL.MASK_FORMER.TEST.PANOPTIC_ON
+            ),
+            "pixel_mean": cfg.MODEL.PIXEL_MEAN,
+            "pixel_std": cfg.MODEL.PIXEL_STD,
+        }) 
         return {
             "backbone": backbone,
             "sem_seg_head": sem_seg_head,
@@ -172,7 +188,7 @@ class MaskFormer(nn.Module):
 
         
         print("number of classes", self.sem_seg_head.num_classes)
-        assert self.sem_seg_head.num_classes == 1
+        # assert self.sem_seg_head.num_classes == 1
        
         images = [(x - self.pixel_mean) / self.pixel_std for x in images]
         images = ImageList.from_tensors(images, self.size_divisibility)
@@ -244,11 +260,11 @@ class MaskFormer(nn.Module):
                     r = sem_seg_postprocess(r, image_size, height, width)
                 print("length of result", len(r))
                 
-                s = torch.tensor(r[0])
-                s[s > 0.5] = 1
-                cv2.imshow('masked image', np.array(s))
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
+                # s = torch.tensor(r[0])
+                # s[s > 0.5] = 1
+                # cv2.imshow('masked image', np.array(s))
+                # cv2.waitKey(0)
+                # cv2.destroyAllWindows()
 
                 processed_results.append({"sem_seg": r})
 
