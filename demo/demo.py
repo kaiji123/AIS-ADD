@@ -13,8 +13,9 @@ import register_cs
 import tempfile
 import time
 import warnings
-
-import cv2
+from sys import platform
+if platform == 'win32':
+    import cv2
 import numpy as np
 import tqdm
 
