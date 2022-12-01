@@ -117,6 +117,12 @@ if __name__ == "__main__":
             # use PIL, to be consistent with evaluation
             img = read_image(path, format="BGR")
             start_time = time.time()
+            if platform != "win32":
+                pred = demo.run_on_image(img)
+                from PIL import Image
+                im = Image.fromarray(pred)
+                im.save("your_file.jpeg")
+                break
             predictions, visualized_output = demo.run_on_image(img)
             logger.info(
                 "{}: {} in {:.2f}s".format(
