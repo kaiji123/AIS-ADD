@@ -9,7 +9,7 @@ import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 # fmt: on
-
+import register_cs
 import tempfile
 import time
 import warnings

@@ -17,6 +17,8 @@ from .modeling.criterion import SetCriterion
 from .modeling.matcher import HungarianMatcher
 
 import matplotlib.pyplot as plt
+import numpy as np
+
 @META_ARCH_REGISTRY.register()
 class MaskFormer(nn.Module):
     """
@@ -166,17 +168,15 @@ class MaskFormer(nn.Module):
         images = [x["image"].to(self.device) for x in batched_inputs]
         # print("shape",images[0].shape)
         # print("data",images[0])
+
+
+        
         print("number of classes", self.sem_seg_head.num_classes)
         assert self.sem_seg_head.num_classes == 1
        
         images = [(x - self.pixel_mean) / self.pixel_std for x in images]
         images = ImageList.from_tensors(images, self.size_divisibility)
-        img = images[0].view(images[1].shape[1], images[1].shape[2], images[1].shape[0])
-
-        # plt.imshow(img)
-        # plt.show()
-        # time.sleep(5000)
-        # plt.close()
+   
 
 
         features = self.backbone(images.tensor)
@@ -229,6 +229,7 @@ class MaskFormer(nn.Module):
             for mask_cls_result, mask_pred_result, input_per_image, image_size in zip(
                 mask_cls_results, mask_pred_results, batched_inputs, images.image_sizes
             ):
+
                 height = input_per_image.get("height", image_size[0])
                 width = input_per_image.get("width", image_size[1])
 
@@ -241,6 +242,14 @@ class MaskFormer(nn.Module):
                 r = self.semantic_inference(mask_cls_result, mask_pred_result)
                 if not self.sem_seg_postprocess_before_inference:
                     r = sem_seg_postprocess(r, image_size, height, width)
+                print("length of result", len(r))
+                
+                s = torch.tensor(r[0])
+                s[s > 0.5] = 1
+                cv2.imshow('masked image', np.array(s))
+                cv2.waitKey(0)
+                cv2.destroyAllWindows()
+
                 processed_results.append({"sem_seg": r})
 
                 # panoptic segmentation inference

@@ -7,6 +7,7 @@ This script is a simplified version of the training script in detectron2/tools.
 import copy
 import itertools
 import logging
+import numpy as np
 import os
 from collections import OrderedDict
 from typing import Any, Dict, List, Set
@@ -42,6 +43,43 @@ from mask_former import (
 )
 
 
+class SegEval(SemSegEvaluator):
+    def process(self, inputs, outputs):
+
+        for input, output in zip(inputs, outputs):
+                    
+                    print("self num classes", self._num_classes)
+                    if self._num_classes ==1:
+                        print("skipping",input)
+
+                    output = output["sem_seg"].argmax(dim=0).to(self._cpu_device)
+                    print("output",output)
+                    pred = np.array(output, dtype=np.int)
+                    print("prediction", output)
+                    gt_filename = self.input_file_to_gt_file[input["file_name"]]
+                    gt = self.sem_seg_loading_fn(gt_filename, dtype=np.int)
+
+                    gt[gt == self._ignore_label] = self._num_classes
+                    print()
+
+                    self._conf_matrix += np.bincount(
+                        (self._num_classes + 1) * pred.reshape(-1) + gt.reshape(-1),
+                        minlength=self._conf_matrix.size,
+                    ).reshape(self._conf_matrix.shape)
+
+                    if self._compute_boundary_iou:
+                        b_gt = self._mask_to_boundary(gt.astype(np.uint8))
+                        b_pred = self._mask_to_boundary(pred.astype(np.uint8))
+
+                        self._b_conf_matrix += np.bincount(
+                            (self._num_classes + 1) * b_pred.reshape(-1) + b_gt.reshape(-1),
+                            minlength=self._conf_matrix.size,
+                        ).reshape(self._conf_matrix.shape)
+
+                    self._predictions.extend(self.encode_json_sem_seg(pred, input["file_name"]))
+        print("inputs:",inputs)
+        print("outputs",outputs)
+        return super().process(inputs, outputs)
 
 
 class Trainer(DefaultTrainer):
@@ -67,7 +105,7 @@ class Trainer(DefaultTrainer):
         # print(evaluator_type)
         # if evaluator_type in ["sem_seg", "ade20k_panoptic_seg"]:
         evaluator_list.append(
-            SemSegEvaluator(
+            SegEval(
                 dataset_name,
                 distributed=True,
                 output_dir=output_folder,
@@ -104,7 +142,7 @@ class Trainer(DefaultTrainer):
         #     )
         # elif len(evaluator_list) == 1:
         #     return evaluator_list[0]
-        return DatasetEvaluators(evaluator_list)
+        return evaluator_list[0]
 
     @classmethod
     def build_train_loader(cls, cfg):
@@ -229,21 +267,8 @@ class Trainer(DefaultTrainer):
         res = OrderedDict({k + "_TTA": v for k, v in res.items()})
         return res
     
-    @classmethod
-    def train(self):
-        """
-        Run training.
 
-        Returns:
-            OrderedDict of results, if evaluation is enabled. Otherwise None.
-        """
-        super(Trainer, self).train(self.start_iter, self.max_iter)
-        # if len(self.cfg.TEST.EXPECTED_RESULTS) and comm.is_main_process():
-        #     assert hasattr(
-        #         self, "_last_eval_results"
-        #     ), "No evaluation results obtained during training!"
-        #     verify_results(self.cfg, self._last_eval_results)
-        #     return self._last_eval_results
+
 
 
 def setup(args):

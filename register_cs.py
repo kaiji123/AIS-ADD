@@ -5,7 +5,7 @@ from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.data.datasets import load_sem_seg
 from sys import platform
 COCO_CATEGORIES = [
-    {"color": [255, 255, 255], "isthing": 1, "id": 1, "name": "person"},
+    { "isthing": 1, "id": 1, "name": "person"},
 ]
 
 
@@ -52,7 +52,7 @@ def register_cs(root):
             image_root=image_dir,
             sem_seg_root=gt_dir,
             evaluator_type="sem_seg",
-            ignore_label=0,
+            ignore_label=None,
             **meta,
         )
 
