@@ -11,7 +11,6 @@ from detectron2.utils.comm import get_world_size
 
 from ..utils.misc import is_dist_avail_and_initialized, nested_tensor_from_tensor_list
 
-import matplotlib.pyplot as plt
 
 def dice_loss(inputs, targets, num_masks):
     """
@@ -77,7 +76,6 @@ class SetCriterion(nn.Module):
         """
         super().__init__()
         self.num_classes = num_classes
-        print(num_classes)
         self.matcher = matcher
         self.weight_dict = weight_dict
         self.eos_coef = eos_coef
@@ -100,21 +98,7 @@ class SetCriterion(nn.Module):
         )
         target_classes[idx] = target_classes_o
 
-        # print("target class: ", target_classes)
-        # print( "src:", src_logits.transpose(1, 2).shape)
-   
-        # print("target classes:", target_classes.size())
-        # print(target_classes.shape)
-        
-        # print("target class", target_classes.shape)
-        # print(target_classes[0].shape)
-        # plt.imshow(target_classes[0])
-        # plt.show()
-        src_logits = torch.squeeze(src_logits)
-        target_classes = target_classes.long()
-        print(src_logits.shape)
-        print(target_classes.shape)
-        loss_ce = F.cross_entropy(input= src_logits, target=target_classes)
+        loss_ce = F.cross_entropy(src_logits.transpose(1, 2), target_classes, self.empty_weight)
         losses = {"loss_ce": loss_ce}
         return losses
 
@@ -173,11 +157,6 @@ class SetCriterion(nn.Module):
                       The expected keys in each dict depends on the losses applied, see each loss' doc
         """
         outputs_without_aux = {k: v for k, v in outputs.items() if k != "aux_outputs"}
-        
-        # print(targets)
-       
-    
-        
 
         # Retrieve the matching between the outputs of the last layer and the targets
         indices = self.matcher(outputs_without_aux, targets)
