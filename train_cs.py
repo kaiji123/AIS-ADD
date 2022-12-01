@@ -46,36 +46,37 @@ import numpy as np
 
 # python ./train_cs.py --config-file configs\myconfig.yaml --eval-only MODEL.WEIGHTS output\model_final.pth
 class SegEval(SemSegEvaluator):
-    def process(self, inputs, outputs):
+    pass
+    # def process(self, inputs, outputs):
 
-         for input, output in zip(inputs, outputs):
-            output = output["sem_seg"][1]
-            print(output.shape)
+    #      for input, output in zip(inputs, outputs):
+    #         output = output["sem_seg"][1]
+    #         print(output.shape)
      
             
-            gt_filename = self.input_file_to_gt_file[input["file_name"]]
-            gt = self.sem_seg_loading_fn(gt_filename, dtype=np.int)
-            pred = output
-            print("pred",pred.shape)
-            print("gt",gt.shape)
-            gt[gt == self._ignore_label] = self._num_classes
-            print(pred.reshape(-1).shape) 
-            print(gt.reshape(-1).shape)
-            # self._conf_matrix += np.bincount(
-            #     (self._num_classes + 1)* pred.reshape(-1) + gt.reshape(-1),
-            #     minlength=self._conf_matrix.size,
-            # ).reshape(self._conf_matrix.shape)
+    #         gt_filename = self.input_file_to_gt_file[input["file_name"]]
+    #         gt = self.sem_seg_loading_fn(gt_filename, dtype=np.int)
+    #         pred = output
+    #         print("pred",pred.shape)
+    #         print("gt",gt.shape)
+    #         gt[gt == self._ignore_label] = self._num_classes
+    #         print(pred.reshape(-1).shape) 
+    #         print(gt.reshape(-1).shape)
+    #         # self._conf_matrix += np.bincount(
+    #         #     (self._num_classes + 1)* pred.reshape(-1) + gt.reshape(-1),
+    #         #     minlength=self._conf_matrix.size,
+    #         # ).reshape(self._conf_matrix.shape)
 
-            if self._compute_boundary_iou:
-                b_gt = self._mask_to_boundary(gt.astype(np.uint8))
-                b_pred = self._mask_to_boundary(pred.numpy().astype(np.uint8))
+    #         if self._compute_boundary_iou:
+    #             b_gt = self._mask_to_boundary(gt.astype(np.uint8))
+    #             b_pred = self._mask_to_boundary(pred.numpy().astype(np.uint8))
 
-                # self._b_conf_matrix += np.bincount(
-                #     (self._num_classes + 1) * b_pred.reshape(-1) + b_gt.reshape(-1),
-                #     minlength=self._conf_matrix.size,
-                # ).reshape(self._conf_matrix.shape)
+    #             # self._b_conf_matrix += np.bincount(
+    #             #     (self._num_classes + 1) * b_pred.reshape(-1) + b_gt.reshape(-1),
+    #             #     minlength=self._conf_matrix.size,
+    #             # ).reshape(self._conf_matrix.shape)
 
-            # self._predictions.extend(self.encode_json_sem_seg(pred, input["file_name"]))
+    #         # self._predictions.extend(self.encode_json_sem_seg(pred, input["file_name"]))
 
 
 class Trainer(DefaultTrainer):

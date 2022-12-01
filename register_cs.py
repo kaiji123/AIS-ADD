@@ -53,7 +53,7 @@ def register_cs(root):
             image_root=image_dir,
             sem_seg_root=gt_dir,
             evaluator_type="sem_seg",
-            ignore_label=None,
+            ignore_label=65535,
             **meta,
         )
 

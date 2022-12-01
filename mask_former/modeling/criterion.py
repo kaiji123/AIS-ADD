@@ -112,6 +112,8 @@ class SetCriterion(nn.Module):
         # plt.show()
         src_logits = torch.squeeze(src_logits)
         target_classes = target_classes.long()
+        print(src_logits.shape)
+        print(target_classes.shape)
         loss_ce = F.cross_entropy(input= src_logits, target=target_classes)
         losses = {"loss_ce": loss_ce}
         return losses
