@@ -26,7 +26,7 @@ from detectron2.utils.logger import setup_logger
 from mask_former import add_mask_former_config
 from predictor import VisualizationDemo
 
-
+#python demo\demo.py --config-file 'C:\Users\Kai Ji\Desktop\Maskformer\MaskFormer\configs\myconfig.yaml' --input 'C:\Users\Kai Ji\Desktop\Maskformer\MaskFormer\datasets\cs\test\images\36.jpg' --opts MODEL.WEIGHTS output\model_final.pth
 # constants
 WINDOW_NAME = "MaskFormer demo"
 

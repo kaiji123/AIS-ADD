@@ -122,14 +122,14 @@ class MaskFormerSemanticDatasetMapper:
                 )
             )
 
-        print("shape", sem_seg_gt.shape)
+        # print("shape", sem_seg_gt.shape)
 
         # aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
         # aug_input, transforms = T.apply_transform_gens(self.tfm_gens, aug_input)
         # image = aug_input.image
         # sem_seg_gt = aug_input.sem_seg
         sem_seg_gt[sem_seg_gt > 0] = 1
-        print("non zerovalues",sem_seg_gt[sem_seg_gt !=0])
+        # print("non zerovalues",sem_seg_gt[sem_seg_gt !=0])
 
         # Pad image and segmentation label here!
         image = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
