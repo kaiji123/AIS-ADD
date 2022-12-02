@@ -9,7 +9,7 @@ import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 # fmt: on
-import register_cs
+
 import tempfile
 import time
 import warnings
@@ -118,11 +118,10 @@ if __name__ == "__main__":
             img = read_image(path, format="BGR")
             start_time = time.time()
             if platform != "win32":
-                pred = demo.run_on_image(img)
-                from PIL import Image
-                im = Image.fromarray(pred)
-                im.save("your_file.jpeg")
-                break
+              from google.colab.patches import cv2_imshow
+              pred = demo.run_on_image(img)
+              cv2_imshow(pred)
+              break
             predictions, visualized_output = demo.run_on_image(img)
             logger.info(
                 "{}: {} in {:.2f}s".format(

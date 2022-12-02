@@ -505,3 +505,4 @@ def register_all_mapillary_vistas(root):
 
 _root = os.getenv("DETECTRON2_DATASETS", "datasets")
 register_all_mapillary_vistas(_root)
+print(len(MAPILLARY_VISTAS_SEM_SEG_CATEGORIES))

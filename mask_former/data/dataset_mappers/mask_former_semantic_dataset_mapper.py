@@ -122,20 +122,15 @@ class MaskFormerSemanticDatasetMapper:
                 )
             )
 
-        # print("shape", sem_seg_gt.shape)
-
-        # aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
-        # aug_input, transforms = T.apply_transform_gens(self.tfm_gens, aug_input)
-        # image = aug_input.image
-        # sem_seg_gt = aug_input.sem_seg
-        sem_seg_gt[sem_seg_gt > 0] = 1
-        # print("non zerovalues",sem_seg_gt[sem_seg_gt !=0])
+        aug_input = T.AugInput(image, sem_seg=sem_seg_gt)
+        aug_input, transforms = T.apply_transform_gens(self.tfm_gens, aug_input)
+        image = aug_input.image
+        sem_seg_gt = aug_input.sem_seg
 
         # Pad image and segmentation label here!
         image = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
         if sem_seg_gt is not None:
             sem_seg_gt = torch.as_tensor(sem_seg_gt.astype("long"))
-        
 
         if self.size_divisibility > 0:
             image_size = (image.shape[-2], image.shape[-1])
@@ -170,7 +165,7 @@ class MaskFormerSemanticDatasetMapper:
             # remove ignored region
             classes = classes[classes != self.ignore_label]
             instances.gt_classes = torch.tensor(classes, dtype=torch.int64)
-
+            print(len(classes))
             masks = []
             for class_id in classes:
                 masks.append(sem_seg_gt == class_id)
