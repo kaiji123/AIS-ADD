@@ -5,8 +5,8 @@ from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.data.datasets import load_sem_seg
 from sys import platform
 COCO_CATEGORIES = [
-    { "isthing": 1, "id": 1, "name": "person"},
-    { "isthing": 0, "id": 0, "name": "notperson"}
+    {  "isthing": 1, "id": 1, "name": "person"},
+    # { "isthing": 0, "id": 0, "name": "notperson"}
 ]
 
 

@@ -18,13 +18,26 @@ from .modeling.matcher import HungarianMatcher
 
 import matplotlib.pyplot as plt
 import numpy as np
+import json
+
+def appendToFile(filename, entry):
+
+    # 1. Read file contents
+    with open(filename, "r") as file:
+        data = json.load(file)
+    # 2. Update json object
+    data.append(entry)
+    # 3. Write json file
+    with open(filename, "w") as file:
+        json.dump(data, file)
+    print('json dumped')
 
 @META_ARCH_REGISTRY.register()
 class MaskFormer(nn.Module):
     """
     Main class for mask classification semantic segmentation architectures.
     """
-
+    count = 0
     @configurable
     def __init__(
         self,
@@ -108,6 +121,7 @@ class MaskFormer(nn.Module):
             weight_dict.update(aux_weight_dict)
 
         losses = ["labels", "masks"]
+        # losses = ["masks"]
         # print("number of classes ",sem_seg_head.num_classes )
         criterion = SetCriterion(
             sem_seg_head.num_classes,
@@ -181,6 +195,7 @@ class MaskFormer(nn.Module):
                     segments_info (list[dict]): Describe each segment in `panoptic_seg`.
                         Each dict contains keys "id", "category_id", "isthing".
         """
+        self.count = self.count +1
         images = [x["image"].to(self.device) for x in batched_inputs]
         # print("shape",images[0].shape)
         # print("data",images[0])
@@ -228,7 +243,7 @@ class MaskFormer(nn.Module):
                     # remove this loss if not specified in `weight_dict`
                     losses.pop(k)
             print(losses)
-
+            appendToFile('loss.json',losses)
             return losses
         else:
             mask_cls_results = outputs["pred_logits"]
@@ -260,11 +275,14 @@ class MaskFormer(nn.Module):
                     r = sem_seg_postprocess(r, image_size, height, width)
                 print("length of result", len(r))
                 
-                # s = torch.tensor(r[0])
-                # s[s > 0.5] = 1
-                # cv2.imshow('masked image', np.array(s))
-                # cv2.waitKey(0)
-                # cv2.destroyAllWindows()
+                if self.count == 9:
+                    print(r.shape)
+                    print(np.unique(r))
+                    s = torch.tensor(r[0])
+                    s[s > 0.5] = 1
+                    cv2.imshow('masked image', np.array(s))
+                    cv2.waitKey(0)
+                    cv2.destroyAllWindows()
 
                 processed_results.append({"sem_seg": r})
 

@@ -126,8 +126,12 @@ class PersonVisualizer(Visualizer):
                 mask_color = None
 
             binary_mask = (sem_seg == label).astype(np.uint8)
+        
             print(np.unique(binary_mask))
             text = self.metadata.stuff_classes[label]
+            print("binary mask", np.unique(binary_mask))
+            print("mask shape", binary_mask.shape)
+            
             self.draw_binary_mask(
                 binary_mask,
                 color=mask_color,
@@ -136,6 +140,7 @@ class PersonVisualizer(Visualizer):
                 alpha=alpha,
                 area_threshold=area_threshold,
             )
+            return binary_mask
         return self.output
 
 from sys import platform
@@ -215,6 +220,8 @@ class VisualizationDemo(object):
                 vis_output = visualizer.draw_sem_seg(
                     predictions["sem_seg"].argmax(dim=0).to(self.cpu_device)
                 )
+                
+                print(vis_output)
             if "instances" in predictions:
                 instances = predictions["instances"].to(self.cpu_device)
                 print("instances ",instances)

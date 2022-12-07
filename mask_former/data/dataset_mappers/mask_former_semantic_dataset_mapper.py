@@ -128,7 +128,9 @@ class MaskFormerSemanticDatasetMapper:
         # aug_input, transforms = T.apply_transform_gens(self.tfm_gens, aug_input)
         # image = aug_input.image
         # sem_seg_gt = aug_input.sem_seg
-        sem_seg_gt[sem_seg_gt > 0] = 1
+        print(np.unique(sem_seg_gt))
+      
+        print(np.unique(sem_seg_gt))
         # print("non zerovalues",sem_seg_gt[sem_seg_gt !=0])
 
         # Pad image and segmentation label here!
@@ -161,13 +163,16 @@ class MaskFormerSemanticDatasetMapper:
 
         if "annotations" in dataset_dict:
             raise ValueError("Semantic segmentation dataset should not have 'annotations'.")
-
+        sem_seg_gt[sem_seg_gt <=128] =0
+        sem_seg_gt[sem_seg_gt >128]=1
         # Prepare per-category binary masks
         if sem_seg_gt is not None:
             sem_seg_gt = sem_seg_gt.numpy()
             instances = Instances(image_shape)
             classes = np.unique(sem_seg_gt)
             # remove ignored region
+            print("classes",classes)
+
             classes = classes[classes != self.ignore_label]
             instances.gt_classes = torch.tensor(classes, dtype=torch.int64)
 

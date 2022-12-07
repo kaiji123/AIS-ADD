@@ -141,11 +141,11 @@ class MaskFormerSemanticDatasetMapper:
         #mask it - method 1:
         # read mask as grayscale in range 0 to 255
         # print(sem_seg_gt.shape)
-        print("sem. seg ",sem_seg_gt)
+        # print("sem. seg ",sem_seg_gt)
         for i in sem_seg_gt:
             for x in i:
                 print(x)
-        # sem_seg_gt[sem_seg_gt >0]=1
+    
         # print('sem seg ', sem_seg_gt)
         # mask1 = sem_seg_gt.copy()
         # result1 = img.copy()

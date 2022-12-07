@@ -1,0 +1,2 @@
+python demo/demo.py --config-file 
+configs\ade20k-150\maskformer_R101_bs16_160k.yaml --input datasets\cs\train\images\2.jpg --opts MODEL.WEIGHTS models\model_final_1aeb94.pkl
