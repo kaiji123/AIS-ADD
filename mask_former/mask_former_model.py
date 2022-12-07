@@ -93,6 +93,9 @@ class MaskFormer(nn.Module):
         self.sem_seg_postprocess_before_inference = sem_seg_postprocess_before_inference
         self.register_buffer("pixel_mean", torch.Tensor(pixel_mean).view(-1, 1, 1), False)
         self.register_buffer("pixel_std", torch.Tensor(pixel_std).view(-1, 1, 1), False)
+        with open('loss.json', "w") as file:
+            json.dump([], file)
+            print('initial json dumped')
 
     @classmethod
     def from_config(cls, cfg):
@@ -243,7 +246,10 @@ class MaskFormer(nn.Module):
                     # remove this loss if not specified in `weight_dict`
                     losses.pop(k)
             print(losses)
-            appendToFile('loss.json',losses)
+            for k, v in losses.items():
+                print(v.item())
+            json_errors = {k: v.item() for k, v in losses.items()}
+            appendToFile('loss.json',json_errors)
             return losses
         else:
             mask_cls_results = outputs["pred_logits"]
