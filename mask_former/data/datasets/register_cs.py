@@ -4,30 +4,6 @@ import os
 from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.data.datasets import load_sem_seg
 from sys import platform
-<<<<<<< HEAD
-CATEGORIES = [
-    {
-        "color": [255, 255, 255],
-        "instances": False,
-        "readable": "person",
-        "name": "void--person",
-        "evaluate": True,
-    },
-    {
-        "color": [0, 0, 0],
-        "instances": False,
-        "readable": "Unlabeled",
-        "name": "void--unlabeled",
-        "evaluate": False,
-    },
-]
-
-
-def _get_meta():
-    stuff_classes = [k["readable"] for k in CATEGORIES if k["evaluate"]]
-    print(stuff_classes)
-    assert len(stuff_classes) == 1
-=======
 COCO_CATEGORIES = [
     {  "isthing": 1, "id": 1, "name": "person"},
     { "isthing": 0, "id": 0, "name": "notperson"}
@@ -39,14 +15,15 @@ def _get_coco_stuff_meta():
     # to 255 in our pre-processing.
     stuff_ids = [k["id"] for k in COCO_CATEGORIES]
     assert len(stuff_ids) == 2, len(stuff_ids)
->>>>>>> origin/test
 
-    stuff_colors = [k["color"] for k in CATEGORIES if k["evaluate"]]
-    assert len(stuff_colors) == 1
+    # For semantic segmentation, this mapping maps from contiguous stuff id
+    # (in [0, 91], used in models) to ids in the dataset (used for processing results)
+    stuff_dataset_id_to_contiguous_id = {k: i for i, k in enumerate(stuff_ids)}
+    stuff_classes = [k["name"] for k in COCO_CATEGORIES]
 
     ret = {
+        "stuff_dataset_id_to_contiguous_id": stuff_dataset_id_to_contiguous_id,
         "stuff_classes": stuff_classes,
-        "stuff_colors": stuff_colors,
     }
     return ret
 
@@ -54,11 +31,7 @@ def _get_coco_stuff_meta():
 def register_cs(root):
     print(root)
     root = os.path.join(root, "cs")
-<<<<<<< HEAD
-    meta = _get_meta()
-=======
     meta = _get_coco_stuff_meta()
->>>>>>> origin/test
     directory= [
         ("train", "train/images", "train/annotations"),
         ("test", "test/images", "test/annotations"),
@@ -80,20 +53,11 @@ def register_cs(root):
             image_root=image_dir,
             sem_seg_root=gt_dir,
             evaluator_type="sem_seg",
-<<<<<<< HEAD
-            ignore_label=0,
-=======
             ignore_label=65535,
->>>>>>> origin/test
             **meta,
         )
 
-    
 
 _root = os.getenv("DETECTRON2_DATASETS", "datasets")
 register_cs(_root)
-<<<<<<< HEAD
-print("cs registered !")
-=======
->>>>>>> origin/test
 DatasetCatalog.get("cs_train")
