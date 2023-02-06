@@ -18,13 +18,26 @@ from .modeling.matcher import HungarianMatcher
 
 import matplotlib.pyplot as plt
 import numpy as np
+import json
+
+def appendToFile(filename, entry):
+
+    # 1. Read file contents
+    with open(filename, "r") as file:
+        data = json.load(file)
+    # 2. Update json object
+    data.append(entry)
+    # 3. Write json file
+    with open(filename, "w") as file:
+        json.dump(data, file)
+    print('json dumped')
 
 @META_ARCH_REGISTRY.register()
 class MaskFormer(nn.Module):
     """
     Main class for mask classification semantic segmentation architectures.
     """
-
+    count = 0
     @configurable
     def __init__(
         self,
@@ -80,6 +93,9 @@ class MaskFormer(nn.Module):
         self.sem_seg_postprocess_before_inference = sem_seg_postprocess_before_inference
         self.register_buffer("pixel_mean", torch.Tensor(pixel_mean).view(-1, 1, 1), False)
         self.register_buffer("pixel_std", torch.Tensor(pixel_std).view(-1, 1, 1), False)
+        with open('loss.json', "w") as file:
+            json.dump([], file)
+            print('initial json dumped')
 
     @classmethod
     def from_config(cls, cfg):
@@ -108,6 +124,7 @@ class MaskFormer(nn.Module):
             weight_dict.update(aux_weight_dict)
 
         losses = ["labels", "masks"]
+        # losses = ["masks"]
         # print("number of classes ",sem_seg_head.num_classes )
         criterion = SetCriterion(
             sem_seg_head.num_classes,
@@ -181,13 +198,14 @@ class MaskFormer(nn.Module):
                     segments_info (list[dict]): Describe each segment in `panoptic_seg`.
                         Each dict contains keys "id", "category_id", "isthing".
         """
+        self.count = self.count +1
         images = [x["image"].to(self.device) for x in batched_inputs]
         # print("shape",images[0].shape)
         # print("data",images[0])
 
 
         
-        print("number of classes", self.sem_seg_head.num_classes)
+        # print("number of classes", self.sem_seg_head.num_classes)
         # assert self.sem_seg_head.num_classes == 1
        
         images = [(x - self.pixel_mean) / self.pixel_std for x in images]
@@ -228,7 +246,10 @@ class MaskFormer(nn.Module):
                     # remove this loss if not specified in `weight_dict`
                     losses.pop(k)
             print(losses)
-
+            for k, v in losses.items():
+                print(v.item())
+            json_errors = {k: v.item() for k, v in losses.items()}
+            appendToFile('loss.json',json_errors)
             return losses
         else:
             mask_cls_results = outputs["pred_logits"]
@@ -258,13 +279,24 @@ class MaskFormer(nn.Module):
                 r = self.semantic_inference(mask_cls_result, mask_pred_result)
                 if not self.sem_seg_postprocess_before_inference:
                     r = sem_seg_postprocess(r, image_size, height, width)
-                print("length of result", len(r))
+                # print("length of result", len(r))
                 
+<<<<<<< HEAD
                 s = torch.tensor(r[0])
                 s[s > 0.5] = 1
                 cv2.imshow('masked image', np.array(s))
                 cv2.waitKey(0)
                 cv2.destroyAllWindows()
+=======
+                # if self.count == 9:
+                #     print(r.shape)
+                #     print(np.unique(r))
+                #     s = torch.tensor(r[0])
+                #     s[s > 0.5] = 1
+                #     cv2.imshow('masked image', np.array(s))
+                #     cv2.waitKey(0)
+                #     cv2.destroyAllWindows()
+>>>>>>> origin/test
 
                 processed_results.append({"sem_seg": r})
 

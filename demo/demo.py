@@ -9,7 +9,11 @@ import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 # fmt: on
+<<<<<<< HEAD
 
+=======
+import register_css
+>>>>>>> origin/test
 import tempfile
 import time
 import warnings

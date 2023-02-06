@@ -318,7 +318,10 @@ def main(args):
 
 if __name__ == "__main__":
     # DatasetCatalog.get('cs_train')
+<<<<<<< HEAD
     # import register_cs
+=======
+>>>>>>> origin/test
     args = default_argument_parser().parse_args()
     print("Command Line Args:", args)
     
