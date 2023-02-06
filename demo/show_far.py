@@ -200,121 +200,27 @@ if __name__ == "__main__":
 
     if args.input:
         # if len(args.input) == 1:
-        x_root = 'C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\cs\\test\\images'
-        y_root = 'C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\cs\\test\\annotations'
-        x_dir= os.listdir('C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\cs\\test\\images')
-        y_dir =  os.listdir('C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\cs\\test\\annotations')
-        print(x_dir)
-        print(y_dir)
-        y_pred = []
-        y_true = []
-        count = 0
-        for i, z in zip(x_dir, y_dir):
-            px = os.path.join(x_root, i)
-            # count = count +1 
-            # if count == 2:
-            #     break
-            print(len(y_true))
-            print(len(y_pred))
+        x_root = 'C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\\far'
+        x_files = os.listdir(x_root)
+        for i in x_files:
+          
             
-            x= cv2.imread(px)
+            x= cv2.imread(x_root + "\\" + i)
             print(x.shape)
-            # cv2.imshow('x',x)
+            cv2.imshow('x',x)
             # image1 = cv2.rectangle(x, (400,300), (600,480), (0,0,0), -1) 
             # print(image1.shape)
             # cv2.imshow('region',image1)
             x = cv2.cvtColor(x, cv2.COLOR_RGBA2BGR)
             print(np.unique(x))
             predictions, visualized_output = demo.run_on_image(x)
-            # visualized_output[300:480, 400:580]=0
-            y_pred.append(visualized_output)
-            
-            # cv2.imshow('pred',visualized_output)
-            py = os.path.join(y_root, z)
-            print(py)
-            y = cv2.imread(py,0)
-            print(np.unique(y))
-            # cv2.imshow('truth',y)
-            y[y<=128] =0
-            y[y>128] = 1
-            
-            print(np.array(y).shape)
-            y_true.append(y)
+            visualized_output[visualized_output==1] = 255
+            print(np.unique(predictions))
+         
+            print(np.unique(visualized_output))
+            cv2.imshow('pred',visualized_output)
+
             if cv2.waitKey(0) == 27:
-                break  # esc to quit
+                pass
 
-        y_pred = np.array(y_pred)
-        y_true = np.array(y_true)
-        print("the mean is ", compute_iou(y_pred=y_pred, y_true=y_true))
-        print("f1-score is", compute_fscore( y_pred, y_true))
-        # print("iou coeff", iou_coef(y_true,y_pred))
-        # print("f1-score is", dice_coef2(y_true, y_pred))
-        # while True:
-        #     print("hello")
-        #     img = np.array(sct.grab({"top": top, "left": left, "width": width, "height": height}))
-        #     # cx,cy = getCenter(left, top, left + width, top + height)
-        #     img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
-        #     # args.input = glob.glob(os.path.expanduser(args.input[0]))
-        #     # assert args.input, "The input path(s) was not found"
-        #     # for path in tqdm.tqdm(args.input, disable=not args.output):
-        #     #     # use PIL, to be consistent with evaluation
-        #     # img = read_image(path, format="BGR")
-        #     predictions, visualized_output = demo.run_on_image(img)
-        #     # logger.info(
-        #     #     "{}: {} in {:.2f}s".format(
-        #     #         path,
-        #     #         "detected {} instances".format(len(predictions["instances"]))
-        #     #         if "instances" in predictions
-        #     #         else "finished",
-        #     #         time.time() - start_time,
-        #     #     )
-        #     # )
-        #     # cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-        #     vis =visualized_output
-        #     print("hello")
-        #     print(np.unique(img))
-        #     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        #     img[vis==0] = 0
-        #     img[vis==1] = 255
-        #     # img[img ==0] = 0
-        #     # img[img == 255] = 1
-        #     print(img.shape)
-        #     # mask = mask/255.0
-        #     # print("mask")
-        #     # print(mask.shape)
-        #     # print(np.unique(mask))
-        #     # mask[mask == 255] = 1
-        #     # are_same = cv2.bitwise_xor(img, vis)
-        #     # all_zeros = not np.any(are_same)
-          
-            
-        #     comparison = img == vis
-        #     equal_arrays = comparison.all()
-        #     print(equal_arrays)
-            
-        #     print(equal_arrays)
-        #     print(np.unique(img))
-        #     cv2.imshow('WINDOW_NAME',img)
-        #     # if cv2.waitKey(25) & 0xFF == ord("p"):
-        #     #     cv2.destroyAllWindows()
-        #     #     break
-
-        #     cv2.waitKey(1)
-        #     # time.sleep(1)
-        #     # cv2.destroyAllWindows()
-
-        #     # if cv2.waitKey(0) == 27:
-        #     #     break  # esc to quit
-        #     # cv2.waitKey(1)
-
-        #     # if args.output:
-        #     #     if os.path.isdir(args.output):
-        #     #         assert os.path.isdir(args.output), args.output
-        #     #         out_filename = os.path.join(args.output, os.path.basename(path))
-        #     #     else:
-        #     #         assert len(args.input) == 1, "Please specify a directory with args.output"
-        #     #         out_filename = args.output
-        #     #     visualized_output.save(out_filename)
-        #     # else:
-              
-
+    

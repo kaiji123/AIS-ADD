@@ -4,97 +4,109 @@ import atexit
 import bisect
 import multiprocessing as mp
 from collections import deque
-
+import time
 
 import torch
 
 from detectron2.data import MetadataCatalog
 from detectron2.engine.defaults import DefaultPredictor
 from detectron2.utils.video_visualizer import VideoVisualizer
-from detectron2.utils.visualizer import ColorMode, Visualizer
+from detectron2.utils.visualizer import ColorMode, Visualizer, _PanopticPrediction, _create_text_labels
 import numpy as np
+
 _OFF_WHITE = (1.0, 1.0, 240.0 / 255)
 class PersonVisualizer(Visualizer):
-    # def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=None, alpha=0.7):
-    #     """
-    #     Draw panoptic prediction annotations or results.
+    
+    def draw_panoptic_seg(self, panoptic_seg, segments_info, area_threshold=None, alpha=0.7):
+        """
+        Draw panoptic prediction annotations or results.
 
-    #     Args:
-    #         panoptic_seg (Tensor): of shape (height, width) where the values are ids for each
-    #             segment.
-    #         segments_info (list[dict] or None): Describe each segment in `panoptic_seg`.
-    #             If it is a ``list[dict]``, each dict contains keys "id", "category_id".
-    #             If None, category id of each pixel is computed by
-    #             ``pixel // metadata.label_divisor``.
-    #         area_threshold (int): stuff segments with less than `area_threshold` are not drawn.
+        Args:
+            panoptic_seg (Tensor): of shape (height, width) where the values are ids for each
+                segment.
+            segments_info (list[dict] or None): Describe each segment in `panoptic_seg`.
+                If it is a ``list[dict]``, each dict contains keys "id", "category_id".
+                If None, category id of each pixel is computed by
+                ``pixel // metadata.label_divisor``.
+            area_threshold (int): stuff segments with less than `area_threshold` are not drawn.
 
-    #     Returns:
-    #         output (VisImage): image object with visualizations.
-    #     """
-    #     pred = _PanopticPrediction(panoptic_seg, segments_info, self.metadata)
-
-    #     if self._instance_mode == ColorMode.IMAGE_BW:
-    #         self.output.reset_image(self._create_grayscale_image(pred.non_empty_mask()))
-     
-    #     # # draw mask for all semantic segments first i.e. "stuff"
-    #     # for mask, sinfo in pred.semantic_masks():
-    #     #     # print("sinfo",sinfo)
-    #     #     # if sinfo['category_id'] != 12:
-    #     #     #     continue
-    #     #     category_idx = sinfo["category_id"]
-    #     #     # sinfo = [x for x in sinfo if x["category_id"] == 12]
-    #     #     # print(sinfo)
-    #     #     try:
-    #     #         mask_color = [x / 255 for x in self.metadata.stuff_colors[category_idx]]
-    #     #     except AttributeError:
-    #     #         mask_color = None
-
-    #     #     text = self.metadata.stuff_classes[category_idx]
-    #     #     # print(text, "is", category_idx)
-    #     #     self.draw_binary_mask(
-    #     #         mask,
-    #     #         color=mask_color,
-    #     #         edge_color=_OFF_WHITE,
-    #     #         text=text,
-    #     #         alpha=alpha,
-    #     #         area_threshold=area_threshold,
-    #     #     )
-
-    #     # draw mask for all instances second
-    #     all_instances = list(pred.instance_masks())
-    #     if len(all_instances) == 0:
-    #         return self.output
-    #     m, s = list(zip(*all_instances))
-    #     sinfo= []
-    #     masks = []
-    #     print("m", m)
-    #     print("s", s)
-    #     for x,y in zip(m,s):
-    #         if y["category_id"] == 12:
-    #             masks.append(x)
-    #             sinfo.append(y)
-    #     print(masks)
-    #     print(sinfo)
-    #     category_ids = [x["category_id"] for x in sinfo]
-    #     try:
-    #         scores = [x["score"] for x in sinfo]
-    #     except KeyError:
-    #         scores = None
-    #     labels = _create_text_labels(
-    #         category_ids, scores, self.metadata.thing_classes, [x.get("iscrowd", 0) for x in sinfo]
-    #     )
-    #     print(labels)
-
-    #     try:
-    #         colors = [
-    #             self._jitter([x / 255 for x in self.metadata.thing_colors[c]]) for c in category_ids
-    #         ]
-    #     except AttributeError:
-    #         colors = None
+        Returns:
+            output (VisImage): image object with visualizations.
+        """
         
-    #     self.overlay_instances(masks=masks, labels=labels, assigned_colors=colors, alpha=alpha)
+   
+    
 
-    #     return self.output
+       
+        pred = _PanopticPrediction(panoptic_seg, segments_info, self.metadata)
+       
+        
+        if self._instance_mode == ColorMode.IMAGE_BW:
+            self.output.reset_image(self._create_grayscale_image(pred.non_empty_mask()))
+     
+        # # draw mask for all semantic segments first i.e. "stuff"
+        # for mask, sinfo in pred.semantic_masks():
+        #     print("sinfo",sinfo)
+        #     if sinfo['category_id'] != 12:
+        #         continue
+        #     category_idx = sinfo["category_id"]
+        #     sinfo = [x for x in sinfo if x["category_id"] == 12]
+        #     print(sinfo)
+        #     try:
+        #         mask_color = [x / 255 for x in self.metadata.stuff_colors[category_idx]]
+        #     except AttributeError:
+        #         mask_color = None
+
+            # text = self.metadata.stuff_classes[category_idx]
+            # # print(text, "is", category_idx)
+            # self.draw_binary_mask(
+            #     mask,
+            #     color=mask_color,
+            #     edge_color=_OFF_WHITE,
+            #     text=text,
+            #     alpha=alpha,
+            #     area_threshold=area_threshold,
+            # )
+
+        # draw mask for all instances second
+        all_instances = list(pred.instance_masks())
+        if len(all_instances) == 0:
+            return self.output
+        m, s = list(zip(*all_instances))
+        sinfo= []
+        masks = []
+        # print("panoptic m", m)
+        # print("s", s)
+        for x,y in zip(m,s):
+            if y["category_id"] == 12:
+                masks.append(x)
+                sinfo.append(y)
+        # print(masks)
+        # print(sinfo)
+        category_ids = [x["category_id"] for x in sinfo]
+        try:
+            scores = [x["score"] for x in sinfo]
+        except KeyError:
+            scores = None
+        labels = _create_text_labels(
+            category_ids, scores, self.metadata.thing_classes, [x.get("iscrowd", 0) for x in sinfo]
+        )
+        # print(labels)
+
+        try:
+            colors = [
+                self._jitter([x / 255 for x in self.metadata.thing_colors[c]]) for c in category_ids
+            ]
+        except AttributeError:
+            colors = None
+        
+        self.overlay_instances(masks=masks, labels=labels, assigned_colors=colors, alpha=alpha)
+
+        return self.output
+    
+    
+    
+    draw_panoptic_seg_predictions = draw_panoptic_seg
     
     def draw_sem_seg(self, sem_seg, area_threshold=None, alpha=0.8):
         """
@@ -197,27 +209,35 @@ class VisualizationDemo(object):
      
 
         vis_output = None
+
+        t1 = time.perf_counter()
         predictions = self.predictor(image)
+        t2 = time.perf_counter()
+        elapsed_time = t2 - t1
+
+            # Print the elapsed time
+        
+        # print(f"Inference took {elapsed_time:.10f} seconds")
         # Convert image from OpenCV BGR format to Matplotlib RGB format.
         image = image[:, :, ::-1]
         visualizer = PersonVisualizer(image, self.metadata, instance_mode=self.instance_mode) # if you want to visualize only person
         # visualizer = Visualizer(image, self.metadata, instance_mode=self.instance_mode) # if you want to visualize everything
-        print("predictions",predictions)
+        # print("predictions",predictions)
         if "panoptic_seg" in predictions:
-            print("panoptic segmentation")
+            # print("panoptic segmentation")
             panoptic_seg, segments_info = predictions["panoptic_seg"]
             vis_output = visualizer.draw_panoptic_seg_predictions(
                 panoptic_seg.to(self.cpu_device), segments_info
             )
         else:
             if "sem_seg" in predictions:
-                print("semantic segmenation")
+                # print("semantic segmenation")
                 vis_output = visualizer.draw_sem_seg(
                     predictions["sem_seg"].argmax(dim=0).to(self.cpu_device)
                 )
             if "instances" in predictions:
                 instances = predictions["instances"].to(self.cpu_device)
-                print("instances ",instances)
+                # print("instances ",instances)
                 vis_output = visualizer.draw_instance_predictions(predictions=instances)
 
         return predictions, vis_output

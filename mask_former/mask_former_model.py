@@ -205,7 +205,7 @@ class MaskFormer(nn.Module):
 
 
         
-        print("number of classes", self.sem_seg_head.num_classes)
+        # print("number of classes", self.sem_seg_head.num_classes)
         # assert self.sem_seg_head.num_classes == 1
        
         images = [(x - self.pixel_mean) / self.pixel_std for x in images]
@@ -279,16 +279,16 @@ class MaskFormer(nn.Module):
                 r = self.semantic_inference(mask_cls_result, mask_pred_result)
                 if not self.sem_seg_postprocess_before_inference:
                     r = sem_seg_postprocess(r, image_size, height, width)
-                print("length of result", len(r))
+                # print("length of result", len(r))
                 
-                if self.count == 9:
-                    print(r.shape)
-                    print(np.unique(r))
-                    s = torch.tensor(r[0])
-                    s[s > 0.5] = 1
-                    cv2.imshow('masked image', np.array(s))
-                    cv2.waitKey(0)
-                    cv2.destroyAllWindows()
+                # if self.count == 9:
+                #     print(r.shape)
+                #     print(np.unique(r))
+                #     s = torch.tensor(r[0])
+                #     s[s > 0.5] = 1
+                #     cv2.imshow('masked image', np.array(s))
+                #     cv2.waitKey(0)
+                #     cv2.destroyAllWindows()
 
                 processed_results.append({"sem_seg": r})
 

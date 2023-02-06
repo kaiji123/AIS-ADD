@@ -1,3 +1,4 @@
+  
 # Copyright (c) Facebook, Inc. and its affiliates.
 # Modified by Bowen Cheng from: https://github.com/facebookresearch/detectron2/blob/master/demo/demo.py
 import argparse
@@ -200,10 +201,10 @@ if __name__ == "__main__":
 
     if args.input:
         # if len(args.input) == 1:
-        x_root = 'C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\cs\\test\\images'
-        y_root = 'C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\cs\\test\\annotations'
-        x_dir= os.listdir('C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\cs\\test\\images')
-        y_dir =  os.listdir('C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\cs\\test\\annotations')
+        x_root = 'C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\\far\\test\\images'
+        y_root = 'C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\\far\\test\\annotations'
+        x_dir= os.listdir('C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\\far\\test\\images')
+        y_dir =  os.listdir('C:\\Users\\Kai Ji\\Desktop\\Maskformer\\MaskFormer\\datasets\\far\\test\\annotations')
         print(x_dir)
         print(y_dir)
         y_pred = []
@@ -226,9 +227,11 @@ if __name__ == "__main__":
             x = cv2.cvtColor(x, cv2.COLOR_RGBA2BGR)
             print(np.unique(x))
             predictions, visualized_output = demo.run_on_image(x)
+            print("vis shape", visualized_output.shape)
+        
             # visualized_output[300:480, 400:580]=0
             y_pred.append(visualized_output)
-            
+            # visualized_output[visualized_output == 1] = 255
             # cv2.imshow('pred',visualized_output)
             py = os.path.join(y_root, z)
             print(py)
@@ -237,6 +240,7 @@ if __name__ == "__main__":
             # cv2.imshow('truth',y)
             y[y<=128] =0
             y[y>128] = 1
+            print
             
             print(np.array(y).shape)
             y_true.append(y)

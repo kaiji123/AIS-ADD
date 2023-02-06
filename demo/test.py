@@ -102,8 +102,7 @@ from sklearn.metrics import confusion_matrix
 import sklearn.metrics as metrics
 import matplotlib.pyplot as plt
 def compute_iou(y_pred, y_true):
-    actual = np.random.binomial(1,.9,size = 1000)
-    print(actual.shape)
+    # actual = np.random.binomial(1,.9,size = 1000)
     # ytrue, ypred is a flatten vector
     y_pred = y_pred.flatten()
     print(np.unique(y_pred))
@@ -188,7 +187,7 @@ if __name__ == "__main__":
         for i, z in zip(x_dir, y_dir):
             px = os.path.join(x_root, i)
             count = count +1 
-            if count == 3:
+            if count == 5:
                 break
             
             x= cv2.imread(px)
@@ -200,8 +199,8 @@ if __name__ == "__main__":
             x = cv2.cvtColor(x, cv2.COLOR_RGBA2BGR)
             print(np.unique(x))
             predictions, visualized_output = demo.run_on_image(x)
-            print(predictions['sem_seg'].shape)
-            s = predictions['sem_seg'][1]
+            print("shape of predictions", predictions['sem_seg'].shape)
+            s = predictions['sem_seg'][0]
             print(s)
             s[s < 0.5] =0
             s[s>=0.5] = 255
@@ -210,6 +209,12 @@ if __name__ == "__main__":
             y_pred.append(visualized_output)
             
             cv2.imshow('pred',np.array(s))
+
+            s = predictions['sem_seg'][1]
+            print(s)
+            s[s < 0.5] =0
+            s[s>=0.5] = 255
+            cv2.imshow('pred2',np.array(s))
             py = os.path.join(y_root, z)
             print(py)
             y = cv2.imread(py,0)

@@ -6,7 +6,7 @@ from detectron2.data.datasets import load_sem_seg
 from sys import platform
 COCO_CATEGORIES = [
     {  "isthing": 1, "id": 1, "name": "person"},
-    # { "isthing": 0, "id": 0, "name": "notperson"}
+    { "isthing": 0, "id": 0, "name": "notperson"}
 ]
 
 
@@ -14,7 +14,7 @@ def _get_coco_stuff_meta():
     # Id 0 is reserved for ignore_label, we change ignore_label for 0
     # to 255 in our pre-processing.
     stuff_ids = [k["id"] for k in COCO_CATEGORIES]
-    assert len(stuff_ids) == 1, len(stuff_ids)
+    assert len(stuff_ids) == 2, len(stuff_ids)
 
     # For semantic segmentation, this mapping maps from contiguous stuff id
     # (in [0, 91], used in models) to ids in the dataset (used for processing results)
