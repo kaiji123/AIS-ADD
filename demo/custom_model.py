@@ -23,7 +23,7 @@ class CustomModel:
     def __init__(self) -> None:
         
         dice_loss = sm.losses.DiceLoss( beta = 1.5) 
-        total_loss = dice_loss + 1.5 * sm.losses.JaccardLoss()
+        total_loss = sm.losses.JaccardLoss()
         BACKBONE = 'efficientnetb3'
 
         CLASSES = ['player']
@@ -39,7 +39,7 @@ class CustomModel:
         # compile keras model with defined optimozer, loss and metrics
         self.model.compile(optim, total_loss, metrics)
         # Load the model
-        self.model.load_weights("models\\unet.h5") 
+        self.model.load_weights("models\\jaccard_unet.h5") 
 
 
 
@@ -72,10 +72,8 @@ class CustomModel:
         predictions = cv2.resize(predictions,(642,480),interpolation=cv2.INTER_NEAREST)
 
         predictions[predictions == 1] = 255
-        cv2.imshow("demo", predictions)
-        cv2.waitKey(1)
-  
-
+        return predictions
+    
 
 
 

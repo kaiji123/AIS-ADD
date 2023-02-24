@@ -27,7 +27,7 @@ from detectron2.utils.logger import setup_logger
 
 from mask_former import add_mask_former_config
 from predictor import VisualizationDemo
-from custom_model import CustomModel
+from custom_model import CustomModel, FPN
 from cnn_model import CNN
 #python demo\demo.py --config-file 'C:\Users\Kai Ji\Desktop\Maskformer\MaskFormer\configs\myconfig.yaml' --input 'C:\Users\Kai Ji\Desktop\Maskformer\MaskFormer\datasets\cs\test\images\36.jpg' --opts MODEL.WEIGHTS output\model_final.pth
 # constants
@@ -127,6 +127,7 @@ if __name__ == "__main__":
         # if len(args.input) == 1:
 
         while True:
+            t1 = time.perf_counter()
             # print("hello")
             img = np.array(sct.grab({"top": top, "left": left, "width": width, "height": height}))
             predcnn = cnn.detectImg(img)
@@ -141,6 +142,13 @@ if __name__ == "__main__":
                 vis =visualized_output.get_image()[:, :, ::-1]
                 # print("hello")
                 cv2.imshow('demo',vis)
+            
+            t2 = time.perf_counter()
+            elapsed_time = t2 - t1
+
+            # Print the elapsed time
+        
+            print(f"Inference took {elapsed_time:.10f} seconds")
             # args.input = glob.glob(os.path.expanduser(args.input[0]))
             # assert args.input, "The input path(s) was not found"
             # for path in tqdm.tqdm(args.input, disable=not args.output):

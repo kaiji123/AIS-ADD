@@ -281,13 +281,6 @@ class MaskFormer(nn.Module):
                     r = sem_seg_postprocess(r, image_size, height, width)
                 # print("length of result", len(r))
                 
-<<<<<<< HEAD
-                s = torch.tensor(r[0])
-                s[s > 0.5] = 1
-                cv2.imshow('masked image', np.array(s))
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
-=======
                 # if self.count == 9:
                 #     print(r.shape)
                 #     print(np.unique(r))
@@ -296,7 +289,6 @@ class MaskFormer(nn.Module):
                 #     cv2.imshow('masked image', np.array(s))
                 #     cv2.waitKey(0)
                 #     cv2.destroyAllWindows()
->>>>>>> origin/test
 
                 processed_results.append({"sem_seg": r})
 

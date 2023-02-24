@@ -104,7 +104,7 @@ optim = tf.keras.optimizers.Adam(LR)
 # # total_loss = bce_loss + sm.losses.DiceLoss()
 dice_loss = sm.losses.DiceLoss( beta = 1.5) 
 focal_loss = sm.losses.BinaryFocalLoss() if n_classes == 1 else sm.losses.CategoricalFocalLoss()
-total_loss = dice_loss + 1.5 * sm.losses.JaccardLoss()
+total_loss = sm.losses.JaccardLoss()
 
 # actulally total_loss can be imported directly from library, above example just show you how to manipulate with losses
 # total_loss = sm.losses.binary_focal_dice_loss # or sm.losses.categorical_focal_dice_loss 
@@ -114,7 +114,7 @@ metrics = [sm.metrics.IOUScore(threshold=0.5), sm.metrics.FScore(threshold=0.5)]
 # compile keras model with defined optimozer, loss and metrics
 model.compile(optim, total_loss, metrics)
 # Load the model
-model.load_weights("models\\unet.h5") 
+model.load_weights("models\\jaccard_unet.h5") 
 
 s =os.listdir('datasets\\far\\test\\images')
 # Load the image and resize it to the input shape of the model
@@ -164,7 +164,7 @@ width =642
 height =480
 autoaim = False
 
-
+s= 0
 while True:
     
     img = np.array(sct.grab({"top": top, "left": left, "width": width, "height": height}))
@@ -181,13 +181,15 @@ while True:
     t1 = time.perf_counter()
     # Predict the class of the image
     predictions = model.predict(image_array).round()
+    s = s+1
+    if s >=20:
 
-    t2 = time.perf_counter()
-    elapsed_time = t2 - t1
+        t2 = time.perf_counter()
+        elapsed_time = t2 - t1
 
-    # Print the elapsed time
-  
-    print(f"Inference took {elapsed_time:.10f} seconds")
+        # Print the elapsed time
+    
+        print(f"Mean inference is {elapsed_time:.10f} seconds")
     # print(predictions.shape)
     # print("unique", np.unique(predictions))
     predictions =predictions.squeeze()
@@ -197,6 +199,8 @@ while True:
     # cv2.imshow('demo unet',predictions[0])
     # cv2.imshow('image',img)
     predictions[predictions == 1] = 255
+
+    
     cv2.imshow("demo", predictions)
     # print(predictions.shape)
     cv2.waitKey(1)

@@ -1,4 +1,10 @@
-# Using Maskformer in FPS-games
+# Using Segmentation in Counter Strike: Conditional zero
+
+This project tries to use Image Segmentation techniques in a FPS game counter strike.
+It uses Semantic Segmentation technique in which a custom model has been created to segment images acquired from the game.
+However, when our project aims to use Semantic Segmentation to detect only 1 enemy. Since when there are multiple enemies, we also want to segment the instance. To do this we used Panoptic Segmentation. We have a repository deveoped by facebook team called Maskformer which exactly uses this technique. We will start developing our own code from there. The core idea is to use both techniques and find a bridge to connect. In our case, we believe that the inference time in Semantic Segmentation is better than Panoptic Segmentation and want to use only when there is one enemy. To connect these two ideas, we use a CNN model to differentiate those above mentioned instances. We believe this technique performs better than only using Panoptic Segmentation in terms of time of inference. Several other data such as training accuracy, test accuracy will be also provided.
+
+Below is the general bibliography and link to Maskformer
 
 # Bibliography.
 
@@ -42,3 +48,6 @@ If you use MaskFormer in your research or wish to refer to the baseline results 
 <div align="center">
   <img src="https://bowenc0221.github.io/images/maskformer.png" width="100%" height="100%"/>
 </div><br/>
+
+# our code
+# how to run the model
