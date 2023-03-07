@@ -1,10 +1,14 @@
 # Copyright (c) Facebook, Inc. and its affiliates.
 # Modified by Bowen Cheng from: https://github.com/facebookresearch/detectron2/blob/master/demo/demo.py
+
+import sys
+# sys.path.append('yolov5')
+sys.path.append('yolo_new')
 import argparse
 import glob
 import multiprocessing as mp
 import os
-
+import random
 # fmt: off
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
@@ -19,22 +23,25 @@ if platform == 'win32':
 import numpy as np
 import tqdm
 import mss
-
+# from yolov5.aimbot import YoloModel
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
 from detectron2.projects.deeplab import add_deeplab_config
 from detectron2.utils.logger import setup_logger
-
+from yolo_new.aimbot import YoloModel
 from mask_former import add_mask_former_config
 from predictor import VisualizationDemo
-from custom_model import CustomModel, FPN
-from cnn_model import CNN
+from custom_model import CustomModel
+from cnn_model import CNN ,AlexNet, AlexFar, CNNFar
 #python demo\demo.py --config-file 'C:\Users\Kai Ji\Desktop\Maskformer\MaskFormer\configs\myconfig.yaml' --input 'C:\Users\Kai Ji\Desktop\Maskformer\MaskFormer\datasets\cs\test\images\36.jpg' --opts MODEL.WEIGHTS output\model_final.pth
 # constants
+
+from test_utils import compute_iou, compute_fscore
 WINDOW_NAME = "MaskFormer demo"
 custom = CustomModel()
-cnn = CNN()
 
+cnn = CNNFar()
+obj_det = YoloModel()
 def setup_cfg(args):
     # load config from file and command-line arguments
     cfg = get_cfg()
@@ -122,59 +129,76 @@ if __name__ == "__main__":
     height =480
     autoaim = False
 
+    x_dir = os.path.join('datasets\\cs_test\\test\\images')
+    y_dir = os.path.join('datasets\\cs_test\\test\\annotations')
+    images = os.listdir(x_dir)
+    annotations = os.listdir(y_dir)
+    print(images)
 
-    if args.input:
-        # if len(args.input) == 1:
 
-        while True:
-            t1 = time.perf_counter()
-            # print("hello")
-            img = np.array(sct.grab({"top": top, "left": left, "width": width, "height": height}))
-            predcnn = cnn.detectImg(img)
-            predcnn = int(predcnn)
-            print(predcnn)
-            if predcnn == 1:
-                custom.detectImg(img)
-            else:
-    
-                img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
-                predictions, visualized_output = demo.run_on_image(img)
-                vis =visualized_output.get_image()[:, :, ::-1]
-                # print("hello")
-                cv2.imshow('demo',vis)
+    iou_mean = 0
+    fscore = 0
+    for i,z in zip(images,annotations):
+        img = cv2.imread(x_dir+ "\\" + i)
+        print(img.shape)
+        label = cv2.imread(y_dir + "\\"+ z, cv2.IMREAD_GRAYSCALE)
+        print(label.shape)
+        cnn.detectImg(img)
+        label[label > 0] = 255
+        cv2.imshow("label", label)
+        s = random.choice([0,1])
+        if s == 1 :
+
+            img = cv2.resize(img, (640,640), interpolation= cv2.INTER_LINEAR)
+            image , boxes, coords = obj_det.predict_coords(img)
+            # print(np.unique(image))
+            print(coords)
+            cv2.imshow("origin", boxes)
+            boxes = cv2.cvtColor(boxes, cv2.COLOR_BGR2GRAY)
+            boxes[:,:]= 0
             
-            t2 = time.perf_counter()
-            elapsed_time = t2 - t1
-
-            # Print the elapsed time
-        
-            print(f"Inference took {elapsed_time:.10f} seconds")
-            # args.input = glob.glob(os.path.expanduser(args.input[0]))
-            # assert args.input, "The input path(s) was not found"
-            # for path in tqdm.tqdm(args.input, disable=not args.output):
-            #     # use PIL, to be consistent with evaluation
-            # img = read_image(path, format="BGR")
+            for inst in coords:
+                
+                x1 = int(inst[0].item())
+                y1 = int(inst[1].item())
+                x2 = int(inst[2].item())
+                y2 = int(inst[3].item())
+                boxes[y1:y2, x1:x2] = 255
+            boxes[boxes> 0] = 255
 
             
-            # start = time.perf_counter()
-            # predictions, visualized_output = demo.run_on_image(img)
-            # end = time.perf_counter()
-            # print("inference time",  end - start)
-            # logger.info(
-            #     "{}: {} in {:.2f}s".format(
-            #         path,
-            #         "detected {} instances".format(len(predictions["instances"]))
-            #         if "instances" in predictions
-            #         else "finished",
-            #         time.time() - start_time,
-            #     )
-            # )
-            # cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-            # vis =visualized_output.get_image()[:, :, ::-1]
-            # print("hello")
-            # cv2.imshow('WINDOW_NAME',vis)
-            # if cv2.waitKey(25) & 0xFF == ord("p"):
-            #     cv2.destroyAllWindows()
-            #     break
+            
+         
+            cv2.imshow("demo", boxes)
 
-            cv2.waitKey(1)
+            predictions = cv2.resize(boxes,(642,480),interpolation=cv2.INTER_LINEAR)
+            
+
+            while True:
+                k = cv2.waitKey(50) & 0xFF
+                if k == ord('q'):
+                    break
+            print(boxes)
+            iou_mean = iou_mean + compute_iou(predictions, label)
+            fscore = fscore + compute_fscore(predictions, label)
+            
+            
+        else:
+            # img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
+            predictions = custom.detectImg(img)
+            # print(np.unique(predictions))
+            predictions[predictions > 0 ]= 255
+            # print(np.unique(label))
+          
+            cv2.imshow("demo", predictions)
+            iou_mean = iou_mean + compute_iou(predictions, label)
+            fscore = fscore + compute_fscore(predictions, label)
+            while True:
+                k = cv2.waitKey(50) & 0xFF
+                if k == ord('q'):
+                    break
+
+
+    print("iou is", iou_mean/8)
+    print("fscore is", fscore / 8)
+
