@@ -1,12 +1,9 @@
-# Using Segmentation in Counter Strike: Conditional zero
+# Adaptive distance detection in Counter Strike: Conditional Zero
+This paper is about object detection model and semantic segmentation model in an FPS game Counter Strike: Conditional Zero to detect enemies. Semantic segmentation is pixel-wise detection algorithm. We customized the architecture for semantic segmentation. We used YOLOv5s to train object detection model. After training, the inference time of semantic segmentation was compared to object detection. It was observed that object detection was slightly faster and semantic segmentation is slower but better at detecting the exact shape of the object. However, we found out that this slight difference of inference can grow exponentially if the both models get more complex. To solve this, we propose a novel approach called Adaptive distance detection which combines both algorithms. We will also introduce Adaptive instance segmentation to combine semantic segmentation and panoptic segmentation.
 
-This project tries to use Image Segmentation techniques in a FPS game counter strike.
-It uses Semantic Segmentation technique in which a custom model has been created to segment images acquired from the game.
-However, when our project aims to use Semantic Segmentation to detect only 1 enemy. Since when there are multiple enemies, we also want to segment the instance. To do this we used Panoptic Segmentation. We have a repository deveoped by facebook team called Maskformer which exactly uses this technique. We will start developing our own code from there. The core idea is to use both techniques and find a bridge to connect. In our case, we believe that the inference time in Semantic Segmentation is better than Panoptic Segmentation and want to use only when there is one enemy. To connect these two ideas, we use a CNN model to differentiate those above mentioned instances. We believe this technique performs better than only using Panoptic Segmentation in terms of time of inference. Several other data such as training accuracy, test accuracy will be also provided.
 
-Below is the general bibliography and link to Maskformer
 
-# Bibliography.
+# Bibliography
 
 ## License
 
@@ -49,5 +46,10 @@ If you use MaskFormer in your research or wish to refer to the baseline results 
   <img src="https://bowenc0221.github.io/images/maskformer.png" width="100%" height="100%"/>
 </div><br/>
 
-# our code
-# how to run the model
+
+## YOLOv5
+https://github.com/ultralytics/yolov5
+
+# Models
+Models from Adaptive distance detection and Adaptive instance segmentation can be accessed from the following link:
+https://bham-my.sharepoint.com/personal/kxj093_student_bham_ac_uk/_layouts/15/guestaccess.aspx?guestaccesstoken=SxuXc9H9Z9R95Ty9BosQxyAn5ck2HEzrKnfX3di6RWI%3D&folderid=2_0b9bc8c41f69b434f9e8bd8bc2ab282b4&rev=1&e=CmXu9q

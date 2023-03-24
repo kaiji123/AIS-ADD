@@ -106,19 +106,19 @@ def test_opencv_video_format(codec, file_ext):
 
 
 if __name__ == "__main__":
-    mp.set_start_method("spawn", force=True)
-    args = get_parser().parse_args()
-    setup_logger(name="fvcore")
-    logger = setup_logger()
-    logger.info("Arguments: " + str(args))
+    # mp.set_start_method("spawn", force=True)
+    # args = get_parser().parse_args()
+    # setup_logger(name="fvcore")
+    # logger = setup_logger()
+    # logger.info("Arguments: " + str(args))
 
-    cfg = setup_cfg(args)
-    cfg.defrost()
-    cfg.MODEL.DEVICE = 'cpu'
-    demo = VisualizationDemo(cfg)
+    # cfg = setup_cfg(args)
+    # cfg.defrost()
+    # cfg.MODEL.DEVICE = 'cpu'
+    # demo = VisualizationDemo(cfg)
     
-    offset = 30
-    times = []
+    # offset = 30
+    # times = []
     sct = mss.mss()
         
     top = 30
@@ -128,10 +128,8 @@ if __name__ == "__main__":
     autoaim = False
 
 
-    if args.input:
-        # if len(args.input) == 1:
 
-        while True:
+    while True:
             t1 = time.perf_counter()
             # print("hello")
             img = np.array(sct.grab({"top": top, "left": left, "width": width, "height": height}))
