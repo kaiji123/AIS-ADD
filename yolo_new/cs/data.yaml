@@ -1,0 +1,13 @@
+train: cs/train/images
+val: cs/valid/images
+test: cs/test/images
+
+nc: 1
+names: ['Enemy']
+
+roboflow:
+  workspace: university-of-birmingham-ibin6
+  project: cs-project
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/university-of-birmingham-ibin6/cs-project/dataset/2
