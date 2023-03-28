@@ -162,3 +162,6 @@ mapillary_vistas/
 ```
 
 No preprocessing is needed for Mapillary Vistas.
+
+
+# yolov5s
