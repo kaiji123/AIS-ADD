@@ -174,26 +174,30 @@ if __name__ == "__main__":
             if p == 0 :
                 print("more person")
                 predictions, visualized_output = demo.run_on_image(img)
-  
+
             
                 # visualized_output[300:480, 400:580]=0
                 pred = visualized_output
          
-
+                # print(predictions)
+                iden = []
                 for i in predictions['panoptic_seg'][1]:
                     if i['category_id'] == 12:
-                        iden = i['id']
+                        iden.append(i['id'])
         
                 vis =visualized_output.get_image()[:, :, ::-1]
                 s = predictions['panoptic_seg'][0].numpy()
             
                
                 s= s.astype(np.uint8)
-      
-                s[s != iden] = 0
-                s[s==iden] = 255
+
+                for x in iden:
+                    s[s==x] = 255
+                s[s != 255] = 0
+                
       
                 # cv2.imshow('demo', s)
+                # cv2.imshow('vis', vis)
                 # while True:
                 #     k = cv2.waitKey(50) & 0xFF
                 #     if k == ord('q'):
