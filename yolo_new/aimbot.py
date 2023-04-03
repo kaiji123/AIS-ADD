@@ -71,7 +71,7 @@ device = select_device('cpu')
 class YoloModel:
     def __init__(self):
         
-        model = DetectMultiBackend('yolo_new\\runs\\train\\exp2\\weights\\best.pt', device=torch.device('cpu'), dnn=False, data='yolov5\dataset\data.yaml', fp16=False)
+        model = DetectMultiBackend('models\\best.pt', device=torch.device('cpu'), dnn=False, data='yolov5\dataset\data.yaml', fp16=False)
         self.model = model
     def predict(self, image):
         return run(source=image, model= self.model)

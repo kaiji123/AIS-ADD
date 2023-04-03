@@ -1,12 +1,14 @@
+  
 # Copyright (c) Facebook, Inc. and its affiliates.
 # Modified by Bowen Cheng from: https://github.com/facebookresearch/detectron2/blob/master/demo/demo.py
 import argparse
 import glob
 import multiprocessing as mp
 import os
-
+import random
 # fmt: off
 import sys
+from test_utils import compute_fscore, compute_iou
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 # fmt: on
 # import register_cs
@@ -19,22 +21,20 @@ if platform == 'win32':
 import numpy as np
 import tqdm
 import mss
-
+from custom_model import CustomModel
+custom = CustomModel()
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
 from detectron2.projects.deeplab import add_deeplab_config
 from detectron2.utils.logger import setup_logger
-
+from cnn_model import CNN
 from mask_former import add_mask_former_config
-from predictor import VisualizationDemo
-from custom_model import CustomModel
-from cnn_model import CNN ,AlexNet
-#python demo\demo.py --config-file 'C:\Users\Kai Ji\Desktop\Maskformer\MaskFormer\configs\myconfig.yaml' --input 'C:\Users\Kai Ji\Desktop\Maskformer\MaskFormer\datasets\cs\test\images\36.jpg' --opts MODEL.WEIGHTS output\model_final.pth
-# constants
+from predictor_test import VisualizationDemo
+
+#python .\demo\test_AIS.py --config-file configs\ade20k-150\maskformer_R101_bs16_160k.yaml --input 
+#datasets\cs\train\images\2.jpg --opts MODEL.WEIGHTS models\model_final_1aeb94.pkl
 WINDOW_NAME = "MaskFormer demo"
-custom = CustomModel()
- 
-cnn = AlexNet()
+
 
 def setup_cfg(args):
     # load config from file and command-line arguments
@@ -101,6 +101,26 @@ def test_opencv_video_format(codec, file_ext):
         return False
 
 
+from sklearn.metrics import confusion_matrix 
+import sklearn.metrics as metrics
+import matplotlib.pyplot as plt
+
+from keras import backend as K
+# def iou_coef(y_true, y_pred, smooth=1):
+#   intersection = K.sum(K.abs(y_true * y_pred), axis=[1,2,3])
+#   union = K.sum(y_true,[1,2,3])+K.sum(y_pred,[1,2,3])-intersection
+#   iou = K.mean((intersection + smooth) / (union + smooth), axis=0)
+#   return iou
+
+# def dice_coef2(y_true, y_pred, smooth = 1):
+#     y_pred = y_pred.flatten()
+#     y_true = y_true.flatten()
+#     np.sum(y_pred)
+#     dice = 2*intersection / union.astype(np.float32)
+#     return dice
+
+
+
 if __name__ == "__main__":
     mp.set_start_method("spawn", force=True)
     args = get_parser().parse_args()
@@ -125,30 +145,29 @@ if __name__ == "__main__":
 
 
     if args.input:
-        # if len(args.input) == 1:
 
-        while True:
-            t1 = time.perf_counter()
-            # print("hello")
-            img = np.array(sct.grab({"top": top, "left": left, "width": width, "height": height}))
-            predcnn = cnn.detectImg(img)
-            predcnn = int(predcnn)
+        x_dir = os.path.join('datasets\\cs-test\\train\\images')
 
-            talex = time.perf_counter()
-
-            elaps_alex = talex - t1
-            print(f"alexnet took {elaps_alex:.10f} seconds")
-            # print(predcnn)
-            if predcnn == 1:
-                custom.detectImg(img)
-            else:
-    
-                img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
-                predictions, visualized_output = demo.run_on_image(img)
-                vis =visualized_output.get_image()[:, :, ::-1]
-                # print("hello")
-                cv2.imshow('demo',vis)
+        images = os.listdir(x_dir)
+        
+        for i in images:
             
+            img = cv2.imread(x_dir+ "\\" + i)
+            t1= time.perf_counter()
+     
+
+            predictions, visualized_output = demo.run_on_image(img)
+
+       
+            pred = visualized_output
             t2 = time.perf_counter()
-            elapsed_time = t2 - t1
-            cv2.waitKey(1)
+            
+            inf  = t2 - t1
+            print(f"Inference is {inf:.2f} seconds")
+        
+
+       
+           
+
+
+        
